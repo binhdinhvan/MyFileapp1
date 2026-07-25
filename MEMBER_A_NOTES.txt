@@ -1,0 +1,78 @@
+=========================================================
+ THANH VIEN A - DUYET & DIEU HUONG FILE (ban bo sung)
+=========================================================
+
+Nguyen tac: CHI THEM code, KHONG xoa dong nao cua ban goc.
+Tat ca tinh nang moi gan vao man hinh chinh (MainActivity).
+
+------------------------------------------------
+1) TINH NANG DA THEM
+------------------------------------------------
+- Breadcrumb: thanh duong dan bam duoc (Root > A > B ...), tu cuon sang
+  phai theo thu muc hien tai. Bam vao 1 chang de nhay thang toi do.
+- Sap xep (Sort): Ten A-Z / Z-A, Kich thuoc, Ngay sua (tang/giam).
+  Thu muc luon dung truoc file.
+- Tim kiem (Search): loc theo ten trong THU MUC HIEN TAI (khong phan biet
+  hoa thuong). Nut X de xoa nhanh. (Xem muc "Ghi chu" ve tim de quy.)
+- Doi List / Grid: nut "Grid"/"List" o goc phai; Grid hien 3 cot.
+- Drawer chon storage: nut ☰ o header mo ngan keo trai, liet ke
+  "Bo nho trong" + "The SD / USB" (kem dung luong trong/tong).
+
+------------------------------------------------
+2) FILE MOI (chi can copy vao, khong dung cham file nguoi khac)
+------------------------------------------------
+Java:
+  ui/main/SortMode.java              (enum kieu sap xep)
+  ui/main/FileListHelper.java        (sort + filter, ham thuan tuy)
+  data/storage/StorageVolumeItem.java
+  data/storage/StorageHelper.java    (liet ke storage)
+  ui/storage/StorageAdapter.java     (adapter cho drawer)
+Layout:
+  res/layout/item_file_grid.xml      (o luoi - DUNG LAI cac id cua item_file)
+  res/layout/item_storage.xml        (dong trong drawer)
+
+------------------------------------------------
+3) FILE CU BI CHINH (chi THEM dong)
+------------------------------------------------
+MainActivity.java
+  - Them import (drawerlayout, gridlayout, gravitycompat, textwatcher,
+    horizontalscrollview, SortMode, FileListHelper, StorageHelper, StorageAdapter)
+  - Them 6 field: drawerLayout, breadcrumbScroll, breadcrumbContainer,
+    sortMode, searchQuery, isGrid
+  - Cuoi onCreate(): them 1 dong  setupBrowseFeatures();
+  - Trong loadFiles(): them 3 dong (sort, filter, updateBreadcrumb) -
+    KHONG xoa dong cu nao
+  - Them 6 method o cuoi class: setupBrowseFeatures, showSortDialog,
+    toggleViewMode, updateBreadcrumb, addCrumb, dpToPx
+
+FileAdapter.java
+  - Them field  itemLayoutRes = R.layout.item_file
+  - Them method setGridMode(boolean)
+  - Doi 1 tham so: inflate(R.layout.item_file...) -> inflate(itemLayoutRes...)
+  (List/Grid dung chung cung 1 ViewHolder vi item_file_grid.xml giu nguyen
+   cac id: tvBadge/tvName/tvDetail/tvCheck -> khong pha logic binding cu.)
+
+activity_main.xml
+  - Boc toan bo noi dung cu trong <androidx.drawerlayout.widget.DrawerLayout>
+    (khong xoa view nao)
+  - Them nut ☰ btnMenu trong header
+  - Them breadcrumb (HorizontalScrollView + breadcrumbContainer)
+  - Them thanh Search/Sort/View (etSearch, btnClearSearch, btnSort, btnViewToggle)
+  - Them panel drawer chua recyclerViewStorage
+
+------------------------------------------------
+4) DEPENDENCY / MANIFEST
+------------------------------------------------
+- KHONG can them quyen hay activity moi -> AndroidManifest KHONG doi.
+- DrawerLayout, GravityCompat, GridLayoutManager thuong da co san qua
+  appcompat + recyclerview. Neu Gradle bao khong tim thay DrawerLayout,
+  them dong:  implementation("androidx.drawerlayout:drawerlayout:1.2.0")
+
+------------------------------------------------
+5) GHI CHU / CO THE NANG CAP SAU
+------------------------------------------------
+- Tim kiem hien loc trong 1 thu muc. Muon tim DE QUY toan bo cay thu muc
+  thi nen chay o background thread (Thread + runOnUiThread) roi do ket qua
+  ra adapter, tranh treo UI voi thu muc lon.
+- Bo loc tim kiem duoc giu khi dieu huong; bam nut X de xoa.
+- Grid dang co dinh 3 cot; co the doi span theo be rong man hinh neu can.
