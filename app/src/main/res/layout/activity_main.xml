@@ -4,52 +4,419 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- MAIN CONTENT -->
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/bg_surface">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="#1976D2"
-        android:padding="16dp"
-        android:elevation="4dp">
+        <!-- TOP APP BAR -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@color/blue_primary"
+            android:paddingStart="8dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:elevation="6dp">
 
-        <TextView
-            android:id="@+id/btnMenu"
-            android:layout_width="40dp"
+            <TextView
+                android:id="@+id/btnMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="&#9776;"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+            <TextView
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="&#8592;"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="My File"
+                    android:textColor="#FFFFFF"
+                    android:textSize="19sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="File Manager"
+                    android:textColor="#BBDEFB"
+                    android:textSize="11sp"
+                    android:layout_marginTop="1dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/btnTrash"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="&#128465;"
+                android:textSize="20sp"
+                android:textColor="#FFFFFF"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Trash" />
+        </LinearLayout>
+
+        <!-- BREADCRUMB -->
+        <HorizontalScrollView
+            android:id="@+id/breadcrumbScroll"
+            android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:layout_marginEnd="4dp"
-            android:gravity="center"
-            android:text="&#9776;"
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            android:background="#FFFFFF"
+            android:scrollbars="none"
+            android:fillViewport="true"
+            android:elevation="2dp">
 
+            <LinearLayout
+                android:id="@+id/breadcrumbContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
+        </HorizontalScrollView>
+
+        <!-- hidden legacy path view kept for code compatibility -->
         <TextView
-            android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:gravity="center"
-            android:text="&lt;"
-            android:textColor="#FFFFFF"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:id="@+id/tvCurrentPath"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
             android:visibility="gone" />
 
+        <!-- SEARCH AND ACTIONS BAR -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="#FFFFFF"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:elevation="1dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_search_box"
+                android:paddingStart="14dp"
+                android:paddingEnd="4dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#128269;"
+                    android:textSize="15sp"
+                    android:textColor="@color/blue_primary" />
+
+                <EditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:hint="Search..."
+                    android:textSize="13sp"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/text_hint"
+                    android:maxLines="1"
+                    android:inputType="text"
+                    android:imeOptions="actionSearch"
+                    android:background="@null" />
+
+                <TextView
+                    android:id="@+id/btnClearSearch"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:gravity="center"
+                    android:text="&#10005;"
+                    android:textColor="@color/text_hint"
+                    android:textSize="14sp"
+                    android:background="?attr/selectableItemBackgroundBorderless" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/btnSort"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="Sort"
+                android:textColor="@color/blue_primary"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_action_pill" />
+
+            <TextView
+                android:id="@+id/btnViewToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginStart="6dp"
+                android:gravity="center"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="Grid"
+                android:textColor="#7B1FA2"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_action_pill" />
+        </LinearLayout>
+
+        <!-- SELECTION TOOLBAR hidden by default -->
+        <LinearLayout
+            android:id="@+id/selectionToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="#1565C0"
+            android:paddingStart="16dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvSelectionCount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0 selected"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/btnSelDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="Delete"
+                android:textColor="#FF8A80"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="?attr/selectableItemBackground" />
+
+            <TextView
+                android:id="@+id/btnSelMove"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="Move"
+                android:textColor="#FFD180"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="?attr/selectableItemBackground" />
+
+            <TextView
+                android:id="@+id/btnSelCopy"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="Copy"
+                android:textColor="#80D8FF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="?attr/selectableItemBackground" />
+
+            <TextView
+                android:id="@+id/btnSelCancel"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:text="&#10005;"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+        </LinearLayout>
+
+        <!-- NORMAL TOOLBAR action buttons -->
+        <LinearLayout
+            android:id="@+id/normalToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical"
+            android:background="#FFFFFF"
+            android:paddingEnd="8dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/btnSelectMode"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="Select"
+                android:textColor="#7B1FA2"
+                android:textSize="12sp"
+                android:background="@drawable/bg_action_pill" />
+
+            <TextView
+                android:id="@+id/btnPaste"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:layout_marginStart="6dp"
+                android:text="Paste"
+                android:textColor="#2E7D32"
+                android:textSize="12sp"
+                android:background="@drawable/bg_action_pill" />
+
+            <TextView
+                android:id="@+id/btnNewFile"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:layout_marginStart="6dp"
+                android:text="+ File"
+                android:textColor="#E65100"
+                android:textSize="12sp"
+                android:background="@drawable/bg_action_pill" />
+
+            <TextView
+                android:id="@+id/btnNewFolder"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:layout_marginStart="6dp"
+                android:text="+ Folder"
+                android:textColor="@color/blue_primary"
+                android:textSize="12sp"
+                android:background="@drawable/bg_action_pill" />
+        </LinearLayout>
+
+        <!-- FILE LIST -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:clipToPadding="false" />
+
+            <!-- Empty state -->
+            <LinearLayout
+                android:id="@+id/emptyState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#128194;"
+                    android:textSize="56sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Empty folder"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="No files or folders here"
+                    android:textColor="@color/text_hint"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <!-- DRAWER SIDEBAR -->
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:orientation="vertical"
+        android:background="@color/bg_surface">
+
+        <!-- Sidebar Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/blue_primary"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="36dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:layout_width="54dp"
+                android:layout_height="54dp"
+                android:gravity="center"
+                android:text="&#128193;"
+                android:textSize="28sp"
+                android:background="@drawable/bg_icon_circle" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:text="My File"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"
@@ -58,291 +425,85 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Quan ly file thiet bi"
+                android:layout_marginTop="2dp"
+                android:text="File Manager"
                 android:textColor="#BBDEFB"
-                android:textSize="12sp"
-                android:layout_marginTop="2dp" />
+                android:textSize="12sp" />
         </LinearLayout>
-    </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvCurrentPath"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        android:background="#F5F5F5"
-        android:textColor="#616161"
-        android:textSize="12sp"
-        android:singleLine="true"
-        android:ellipsize="start" />
-
-    <!-- Breadcrumb -->
-    <HorizontalScrollView
-        android:id="@+id/breadcrumbScroll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FAFAFA"
-        android:scrollbars="none"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:id="@+id/breadcrumbContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp" />
-    </HorizontalScrollView>
-
-    <!-- Tim kiem + Sap xep + Doi List/Grid -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="#FFFFFF"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp">
-
-        <EditText
-            android:id="@+id/etSearch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+        <!-- Scrollable menu content -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
             android:layout_weight="1"
-            android:hint="Tim kiem trong thu muc..."
-            android:textSize="14sp"
-            android:maxLines="1"
-            android:inputType="text"
-            android:imeOptions="actionSearch" />
+            android:scrollbars="none"
+            android:background="@color/bg_surface">
 
-        <TextView
-            android:id="@+id/btnClearSearch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="&#10005;"
-            android:textColor="#9E9E9E"
-            android:textSize="16sp"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-
-        <TextView
-            android:id="@+id/btnSort"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_marginStart="4dp"
-            android:text="Sort"
-            android:textColor="#1976D2"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/btnViewToggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_marginStart="4dp"
-            android:text="Grid"
-            android:textColor="#7B1FA2"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/selectionToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="#1565C0"
-        android:padding="12dp"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/tvSelectionCount"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="0 selected"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/btnSelDelete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Delete"
-            android:textColor="#FFFFFF"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/btnSelMove"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_marginStart="4dp"
-            android:text="Move"
-            android:textColor="#FFFFFF"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/btnSelCopy"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_marginStart="4dp"
-            android:text="Copy"
-            android:textColor="#FFFFFF"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/btnSelCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:layout_marginStart="4dp"
-            android:text="Cancel"
-            android:textColor="#FFFFFF"
-            android:background="?attr/selectableItemBackground" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/normalToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
-
-        <ImageView
-            android:id="@+id/btnTrash"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_margin="12dp"
-            android:src="@drawable/ic_delete"
-            android:background="?attr/selectableItemBackground"
-            android:contentDescription="Trash" />
-
-        <TextView
-            android:id="@+id/btnSelectMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:text="Select"
-            android:textColor="#7B1FA2"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/btnPaste"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:text="Paste"
-            android:textColor="#43A047"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/btnNewFile"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:text="+ New File"
-            android:textColor="#FB8C00"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
-
-        <TextView
-            android:id="@+id/btnNewFolder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:text="+ New Folder"
-            android:textColor="#1976D2"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
-    </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <LinearLayout
-            android:id="@+id/emptyState"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Thu muc trong"
-                android:textColor="#9E9E9E"
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:orientation="vertical"
+                android:paddingBottom="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Khong co file hoac thu muc nao"
-                android:textColor="#BDBDBD"
-                android:textSize="13sp"
-                android:layout_marginTop="4dp" />
-        </LinearLayout>
-    </FrameLayout>
+                <!-- Section: STORAGE -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="STORAGE"
+                    android:textColor="@color/text_hint"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="4dp"
+                    android:letterSpacing="0.12" />
 
-    </LinearLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewStorage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:clipToPadding="false" />
 
-    <!-- Drawer: chon noi luu tru (storage) -->
-    <LinearLayout
-        android:layout_width="280dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:orientation="vertical"
-        android:background="#FFFFFF">
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="@color/divider" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="#1976D2"
-            android:padding="16dp">
+                <!-- Section: QUICK ACCESS -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="QUICK ACCESS"
+                    android:textColor="@color/text_hint"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp"
+                    android:letterSpacing="0.12" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Bo nho"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerViewQuickFolders"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:clipToPadding="false" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Chon noi luu tru"
-                android:textColor="#BBDEFB"
-                android:textSize="12sp"
-                android:layout_marginTop="2dp" />
-        </LinearLayout>
+            </LinearLayout>
+        </ScrollView>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewStorage"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>

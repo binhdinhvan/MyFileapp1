@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Liet ke cac noi luu tru cho drawer.
+ * Liet ke cac noi luu tru va thu muc nhanh cho drawer.
  * - Bo nho trong: Environment.getExternalStorageDirectory()
  * - The SD / USB: suy ra tu getExternalFilesDirs() bang cach cat bo "/Android/data/..."
  *   de lay duong dan goc cua volume (vd /storage/XXXX-XXXX).
+ * - Thu muc nhanh: Hinh anh, Video, Nhac, Tai lieu, Download, DCIM, ...
  */
 public final class StorageHelper {
 
@@ -22,7 +23,7 @@ public final class StorageHelper {
         List<StorageVolumeItem> list = new ArrayList<>();
 
         String primary = Environment.getExternalStorageDirectory().getAbsolutePath();
-        list.add(new StorageVolumeItem("Bo nho trong", primary));
+        list.add(new StorageVolumeItem("Internal Storage", primary));
 
         File[] externals = context.getExternalFilesDirs(null);
         if (externals != null) {
@@ -38,11 +39,41 @@ public final class StorageHelper {
                     String root = p.substring(0, idx);
                     File rootFile = new File(root);
                     if (rootFile.exists() && rootFile.canRead()) {
-                        list.add(new StorageVolumeItem("The SD / USB", root));
+                        list.add(new StorageVolumeItem("SD Card / USB", root));
                     }
                 }
             }
         }
         return list;
+    }
+
+    /**
+     * Returns the list of quick-access folders (Downloads, DCIM, Pictures, etc.).
+     * Only adds a folder if it actually exists on the device.
+     */
+    public static List<QuickFolderItem> getQuickFolders() {
+        List<QuickFolderItem> list = new ArrayList<>();
+        String base = Environment.getExternalStorageDirectory().getAbsolutePath();
+
+        addIfExists(list, "\uD83D\uDCE5", "Downloads",      base + "/Download");
+        addIfExists(list, "\uD83D\uDCF7", "Camera (DCIM)", base + "/DCIM");
+        addIfExists(list, "\uD83D\uDDBC", "Pictures",       Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath());
+        addIfExists(list, "\uD83C\uDFAC", "Videos",         Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).getAbsolutePath());
+        addIfExists(list, "\uD83C\uDFB5", "Music",          Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getAbsolutePath());
+        addIfExists(list, "\uD83D\uDCC4", "Documents",      Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath());
+        addIfExists(list, "\uD83D\uDCF2", "Android",        base + "/Android");
+        addIfExists(list, "\uD83D\uDD14", "Notifications",  base + "/Notifications");
+        addIfExists(list, "\uD83C\uDF99", "Podcasts",       base + "/Podcasts");
+        addIfExists(list, "\uD83D\uDCF3", "Ringtones",      base + "/Ringtones");
+        addIfExists(list, "\u23F0",       "Alarms",          base + "/Alarms");
+
+        return list;
+    }
+
+    private static void addIfExists(List<QuickFolderItem> list, String emoji, String label, String path) {
+        File f = new File(path);
+        if (f.exists()) {
+            list.add(new QuickFolderItem(emoji, label, path));
+        }
     }
 }

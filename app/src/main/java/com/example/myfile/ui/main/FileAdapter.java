@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.myfile.R;
 import com.example.myfile.data.model.FileItem;
@@ -91,20 +92,30 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
 
         if (item.isDirectory()) {
             holder.tvName.setTextColor(0xFF1976D2);
-            holder.tvDetail.setText("Thu muc");
-            holder.tvBadge.setText("DIR");
-            holder.tvBadge.setBackgroundColor(0xFF1976D2);
+            holder.tvDetail.setText("Folder");
+            holder.tvBadge.setText("\uD83D\uDCC1");
+            holder.tvBadge.setTextSize(22);
+            holder.tvBadge.setBackground(
+                    ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.bg_badge_folder));
         } else {
             holder.tvName.setTextColor(0xFF212121);
             String date = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(item.getLastModified());
             String sizeText = formatSize(item.getSize());
-            holder.tvDetail.setText(sizeText + " - " + date);
-            holder.tvBadge.setText(getBadgeText(item.getName()));
-            holder.tvBadge.setBackgroundColor(getBadgeColor(item.getName()));
+            holder.tvDetail.setText(sizeText + "  |  " + date);
+            holder.tvBadge.setText(getBadgeLabel(item.getName()));
+            holder.tvBadge.setTextSize(22);
+            holder.tvBadge.setBackground(
+                    ContextCompat.getDrawable(holder.itemView.getContext(), getBadgeDrawable(item.getName())));
         }
 
         boolean isSelected = selectedPaths.contains(item.getPath());
-        holder.itemView.setBackgroundColor(isSelected ? 0xFFE3F2FD : 0xFFFFFFFF);
+        holder.itemView.setAlpha(isSelected ? 0.85f : 1.0f);
+        // Tint the card border to blue when selected
+        if (isSelected) {
+            holder.itemView.setBackgroundResource(R.drawable.bg_card_selected);
+        } else {
+            holder.itemView.setBackgroundResource(R.drawable.bg_card_item);
+        }
         holder.tvCheck.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
         holder.tvCheck.setChecked(isSelected);
 
@@ -130,40 +141,55 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         return items.size();
     }
 
-    private String getBadgeText(String name) {
+    private String getBadgeLabel(String name) {
         String lower = name.toLowerCase(Locale.getDefault());
-        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png")) {
-            return "IMG";
-        } else if (lower.endsWith(".mp4") || lower.endsWith(".avi") || lower.endsWith(".mkv")) {
-            return "VID";
-        } else if (lower.endsWith(".zip") || lower.endsWith(".rar")) {
-            return "ZIP";
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".gif") || lower.endsWith(".webp")) {
+            return "\uD83D\uDDBC";
+        } else if (lower.endsWith(".mp4") || lower.endsWith(".avi") || lower.endsWith(".mkv") || lower.endsWith(".mov")) {
+            return "\uD83C\uDFAC";
+        } else if (lower.endsWith(".zip") || lower.endsWith(".rar") || lower.endsWith(".7z")) {
+            return "\uD83D\uDCE6";
         } else if (lower.endsWith(".pdf")) {
-            return "PDF";
-        } else if (lower.endsWith(".txt")) {
-            return "TXT";
-        } else if (lower.endsWith(".mp3") || lower.endsWith(".wav")) {
-            return "MP3";
+            return "\uD83D\uDCCB";
+        } else if (lower.endsWith(".txt") || lower.endsWith(".md")) {
+            return "\uD83D\uDCDD";
+        } else if (lower.endsWith(".mp3") || lower.endsWith(".wav") || lower.endsWith(".flac") || lower.endsWith(".ogg")) {
+            return "\uD83C\uDFB5";
+        } else if (lower.endsWith(".apk")) {
+            return "\uD83D\uDCF1";
+        } else if (lower.endsWith(".doc") || lower.endsWith(".docx")) {
+            return "\uD83D\uDCC3";
+        } else if (lower.endsWith(".xls") || lower.endsWith(".xlsx") || lower.endsWith(".csv")) {
+            return "\uD83D\uDCCA";
         }
-        return "FILE";
+        return "\uD83D\uDCC4";
     }
 
-    private int getBadgeColor(String name) {
+    /** @deprecated kept for compatibility */
+    private String getBadgeEmoji(String name) {
+        return getBadgeLabel(name);
+    }
+
+    private int getBadgeDrawable(String name) {
         String lower = name.toLowerCase(Locale.getDefault());
-        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png")) {
-            return 0xFF43A047;
-        } else if (lower.endsWith(".mp4") || lower.endsWith(".avi") || lower.endsWith(".mkv")) {
-            return 0xFF8E24AA;
-        } else if (lower.endsWith(".zip") || lower.endsWith(".rar")) {
-            return 0xFFFB8C00;
-        } else if (lower.endsWith(".pdf")) {
-            return 0xFFE53935;
-        } else if (lower.endsWith(".txt")) {
-            return 0xFF607D8B;
-        } else if (lower.endsWith(".mp3") || lower.endsWith(".wav")) {
-            return 0xFFD81B60;
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".gif") || lower.endsWith(".webp")) {
+            return R.drawable.bg_badge_img;
+        } else if (lower.endsWith(".mp4") || lower.endsWith(".avi") || lower.endsWith(".mkv") || lower.endsWith(".mov")) {
+            return R.drawable.bg_badge_video;
+        } else if (lower.endsWith(".mp3") || lower.endsWith(".wav") || lower.endsWith(".flac") || lower.endsWith(".ogg")) {
+            return R.drawable.bg_badge_audio;
         }
-        return 0xFF90A4AE;
+        return R.drawable.bg_badge_file;
+    }
+
+    /** @deprecated use getBadgeEmoji + getBadgeDrawable instead */
+    private String getBadgeText(String name) {
+        return getBadgeEmoji(name);
+    }
+
+    /** @deprecated use getBadgeDrawable instead */
+    private int getBadgeColor(String name) {
+        return 0xFFFFF3E0;
     }
 
     private String formatSize(long bytes) {

@@ -1,7 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Primary brand -->
     <color name="blue_primary">#1976D2</color>
     <color name="blue_dark">#1565C0</color>
+    <color name="blue_light">#2196F3</color>
+    <color name="blue_accent">#E8F0FE</color>
+
+    <!-- Neutral -->
     <color name="white">#FFFFFF</color>
     <color name="black">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_hint">#9E9E9E</color>
+    <color name="divider">#EDEDED</color>
+    <color name="bg_surface">#F5F7FF</color>
+    <color name="bg_card">#FFFFFF</color>
+
+    <!-- Badge colors -->
+    <color name="badge_folder_bg">#E8F0FE</color>
+    <color name="badge_folder_text">#1565C0</color>
+    <color name="badge_file_bg">#FFF3E0</color>
+    <color name="badge_file_text">#E65100</color>
+    <color name="badge_img_bg">#F3E5F5</color>
+    <color name="badge_img_text">#7B1FA2</color>
+    <color name="badge_video_bg">#FCE4EC</color>
+    <color name="badge_video_text">#C62828</color>
+    <color name="badge_audio_bg">#E8F5E9</color>
+    <color name="badge_audio_text">#2E7D32</color>
+    <color name="badge_doc_bg">#E3F2FD</color>
+    <color name="badge_doc_text">#0D47A1</color>
+
+    <!-- Action colors -->
+    <color name="action_delete">#EF5350</color>
+    <color name="action_move">#FF9800</color>
+    <color name="action_copy">#29B6F6</color>
+    <color name="action_new">#26C6DA</color>
+    <color name="action_select">#7E57C2</color>
+    <color name="action_paste">#66BB6A</color>
 </resources>

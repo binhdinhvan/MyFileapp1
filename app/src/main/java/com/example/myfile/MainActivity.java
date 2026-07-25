@@ -42,6 +42,7 @@ import com.example.myfile.ui.main.FileAdapter;
 import com.example.myfile.ui.main.FileListHelper;
 import com.example.myfile.ui.main.SortMode;
 import com.example.myfile.data.storage.StorageHelper;
+import com.example.myfile.ui.storage.QuickFolderAdapter;
 import com.example.myfile.ui.storage.StorageAdapter;
 import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
@@ -638,6 +639,15 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
             rootPath = storage.getPath();
             searchQuery = "";
             loadFiles(rootPath);
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }));
+
+        RecyclerView rvQuickFolders = findViewById(R.id.recyclerViewQuickFolders);
+        rvQuickFolders.setLayoutManager(new LinearLayoutManager(this));
+        rvQuickFolders.setAdapter(new QuickFolderAdapter(StorageHelper.getQuickFolders(), folder -> {
+            rootPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+            searchQuery = "";
+            loadFiles(folder.getPath());
             drawerLayout.closeDrawer(GravityCompat.START);
         }));
 

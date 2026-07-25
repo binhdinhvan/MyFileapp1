@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- Folder icon circle -->
+    <TextView
+        android:id="@+id/tvFolderEmoji"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:gravity="center"
+        android:textSize="18sp"
+        android:background="@drawable/bg_icon_circle" />
+
+    <!-- Folder name -->
+    <TextView
+        android:id="@+id/tvFolderLabel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="12dp"
+        android:textSize="13sp"
+        android:textColor="@color/black" />
+
+    <!-- Arrow -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="&#8250;"
+        android:textSize="18sp"
+        android:textColor="@color/text_hint" />
+
+</LinearLayout>

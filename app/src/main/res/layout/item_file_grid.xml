@@ -4,54 +4,72 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:padding="8dp"
-    android:background="?attr/selectableItemBackground">
+    android:padding="6dp"
+    android:layout_marginBottom="4dp"
+    android:background="@drawable/bg_card_item"
+    android:elevation="2dp">
 
     <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground">
 
-        <TextView
-            android:id="@+id/tvBadge"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:gravity="center"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF"
-            android:background="#90A4AE" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="10dp">
 
+            <!-- Badge icon -->
+            <TextView
+                android:id="@+id/tvBadge"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/badge_folder_text"
+                android:background="@drawable/bg_badge_folder" />
+
+            <!-- File name -->
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <!-- Detail (size / count) -->
+            <TextView
+                android:id="@+id/tvDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:gravity="center"
+                android:textSize="10sp"
+                android:textColor="@color/text_hint"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+        </LinearLayout>
+
+        <!-- Checkbox overlay (selection mode) -->
         <CheckBox
             android:id="@+id/tvCheck"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|end"
+            android:layout_margin="4dp"
             android:clickable="false"
             android:focusable="false"
             android:visibility="gone" />
+
     </FrameLayout>
-
-    <TextView
-        android:id="@+id/tvName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:textSize="13sp"
-        android:textStyle="bold"
-        android:textColor="#212121"
-        android:maxLines="2"
-        android:ellipsize="end" />
-
-    <TextView
-        android:id="@+id/tvDetail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:gravity="center"
-        android:textSize="10sp"
-        android:textColor="#757575"
-        android:maxLines="1"
-        android:ellipsize="end" />
 
 </LinearLayout>
