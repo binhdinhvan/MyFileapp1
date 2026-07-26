@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -126,6 +127,11 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
             String countText = childCount == 1 ? "1 item" : childCount + " items";
             itemHolder.tvDetail.setText(date + "  |  " + countText);
+            itemHolder.tvBadge.setVisibility(View.VISIBLE);
+            if (itemHolder.ivThumbnail != null) {
+                itemHolder.ivThumbnail.setVisibility(View.GONE);
+                com.bumptech.glide.Glide.with(itemHolder.itemView.getContext()).clear(itemHolder.ivThumbnail);
+            }
             itemHolder.tvBadge.setText("\uD83D\uDCC1");
             itemHolder.tvBadge.setTextSize(22);
             itemHolder.tvBadge.setBackground(
@@ -141,10 +147,37 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 String date = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(item.getLastModified());
                 itemHolder.tvDetail.setText(date + "  |  " + sizeText);
             }
-            itemHolder.tvBadge.setText(getBadgeLabel(item.getName()));
-            itemHolder.tvBadge.setTextSize(22);
-            itemHolder.tvBadge.setBackground(
-                    ContextCompat.getDrawable(itemHolder.itemView.getContext(), getBadgeDrawable(item.getName())));
+            
+            String lowerName = item.getName().toLowerCase(Locale.getDefault());
+            boolean isImage = lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") || lowerName.endsWith(".png") || lowerName.endsWith(".gif") || lowerName.endsWith(".webp") || lowerName.endsWith(".bmp");
+            boolean isVideo = lowerName.endsWith(".mp4") || lowerName.endsWith(".mkv") || lowerName.endsWith(".avi") || lowerName.endsWith(".mov");
+            boolean isPdf = lowerName.endsWith(".pdf");
+
+            if (isImage || isVideo) {
+                itemHolder.tvBadge.setVisibility(View.INVISIBLE);
+                if (itemHolder.ivThumbnail != null) {
+                    itemHolder.ivThumbnail.setVisibility(View.VISIBLE);
+                    com.bumptech.glide.Glide.with(itemHolder.itemView.getContext())
+                            .load(item.getPath())
+                            .centerCrop()
+                            .into(itemHolder.ivThumbnail);
+                }
+            } else if (isPdf) {
+                itemHolder.tvBadge.setVisibility(View.INVISIBLE);
+                if (itemHolder.ivThumbnail != null) {
+                    itemHolder.ivThumbnail.setVisibility(View.VISIBLE);
+                    com.example.myfile.utils.ThumbnailLoader.getInstance().loadPdfThumbnail(item.getPath(), itemHolder.ivThumbnail);
+                }
+            } else {
+                itemHolder.tvBadge.setVisibility(View.VISIBLE);
+                if (itemHolder.ivThumbnail != null) {
+                    itemHolder.ivThumbnail.setVisibility(View.GONE);
+                }
+                itemHolder.tvBadge.setText(getBadgeLabel(item.getName()));
+                itemHolder.tvBadge.setTextSize(22);
+                itemHolder.tvBadge.setBackground(
+                        ContextCompat.getDrawable(itemHolder.itemView.getContext(), getBadgeDrawable(item.getName())));
+            }
         }
 
         boolean isSelected = selectedPaths.contains(item.getPath());
@@ -242,6 +275,7 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView tvBadge;
+        ImageView ivThumbnail;
         TextView tvName;
         TextView tvDetail;
         CheckBox tvCheck;
@@ -249,6 +283,7 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         ItemViewHolder(View itemView) {
             super(itemView);
             tvBadge = itemView.findViewById(R.id.tvBadge);
+            ivThumbnail = itemView.findViewById(R.id.ivThumbnail);
             tvName = itemView.findViewById(R.id.tvName);
             tvDetail = itemView.findViewById(R.id.tvDetail);
             tvCheck = itemView.findViewById(R.id.tvCheck);

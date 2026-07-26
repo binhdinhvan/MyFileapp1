@@ -35,4 +35,5 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.activity:activity:1.8.2")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 }

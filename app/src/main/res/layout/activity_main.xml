@@ -189,6 +189,19 @@
                 android:background="?attr/selectableItemBackground" />
 
             <TextView
+                android:id="@+id/btnSelZip"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="Zip"
+                android:textColor="#B388FF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:background="?attr/selectableItemBackground" />
+
+            <TextView
                 android:id="@+id/btnSelCancel"
                 android:layout_width="36dp"
                 android:layout_height="36dp"

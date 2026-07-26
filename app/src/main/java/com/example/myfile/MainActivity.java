@@ -23,6 +23,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import android.webkit.MimeTypeMap;
+import android.media.ExifInterface;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -111,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         findViewById(R.id.btnSelDelete).setOnClickListener(v -> bulkDelete());
         findViewById(R.id.btnSelMove).setOnClickListener(v -> bulkMove());
         findViewById(R.id.btnSelCopy).setOnClickListener(v -> bulkCopy());
+        findViewById(R.id.btnSelZip).setOnClickListener(v -> bulkZip());
         findViewById(R.id.btnTrash).setOnClickListener(v -> startActivity(new Intent(this, TrashActivity.class)));
         findViewById(R.id.btnBack).setOnClickListener(v -> navigateUp());
         findViewById(R.id.btnSearchIcon).setOnClickListener(v -> startActivity(new Intent(this, SearchActivity.class)));
@@ -188,9 +191,10 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
             android.provider.MediaStore.Files.FileColumns.DATE_MODIFIED,
             android.provider.MediaStore.Files.FileColumns.SIZE
         };
-        String sortOrder = android.provider.MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC LIMIT 100";
+        String sortOrder = android.provider.MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC LIMIT 150";
         String selection = android.provider.MediaStore.Files.FileColumns.DATA + " NOT LIKE '%/.thumbnails/%' AND " +
-                           android.provider.MediaStore.Files.FileColumns.MIME_TYPE + " IS NOT NULL";
+                           android.provider.MediaStore.Files.FileColumns.DATA + " NOT LIKE '%/Android/data/%' AND " +
+                           android.provider.MediaStore.Files.FileColumns.DATA + " NOT LIKE '%/Android/media/%'";
         
         try (android.database.Cursor cursor = getContentResolver().query(
                 android.provider.MediaStore.Files.getContentUri("external"),
@@ -212,10 +216,46 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
             e.printStackTrace();
         }
         
+        if (recent.isEmpty()) {
+            java.io.File[] commonDirs = {
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS)
+            };
+            for (java.io.File dir : commonDirs) {
+                if (dir != null && dir.exists()) {
+                    scanRecentFilesFallback(dir, recent, 3);
+                }
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                recent.sort((f1, f2) -> Long.compare(f2.getLastModified(), f1.getLastModified()));
+            } else {
+                java.util.Collections.sort(recent, (f1, f2) -> Long.compare(f2.getLastModified(), f1.getLastModified()));
+            }
+            if (recent.size() > 150) {
+                recent = new ArrayList<>(recent.subList(0, 150));
+            }
+        }
+        
         List<FileItem> grouped = groupFilesByDate(recent);
         adapter.updateData(grouped);
         emptyState.setVisibility(grouped.isEmpty() ? View.VISIBLE : View.GONE);
         findViewById(R.id.btnBack).setVisibility(View.GONE);
+    }
+
+    private void scanRecentFilesFallback(java.io.File dir, List<FileItem> recent, int maxDepth) {
+        if (maxDepth <= 0 || dir == null) return;
+        java.io.File[] files = dir.listFiles();
+        if (files == null) return;
+        for (java.io.File f : files) {
+            if (f.getName().startsWith(".")) continue;
+            if (f.isDirectory()) {
+                scanRecentFilesFallback(f, recent, maxDepth - 1);
+            } else {
+                recent.add(FileItem.fromFile(f));
+            }
+        }
     }
 
     private void checkPermissionAndLoad() {
@@ -389,31 +429,65 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         if (item.isDirectory()) {
             loadFiles(item.getPath());
         } else {
-            Toast.makeText(this, "Open file: " + item.getName() + " (viewer not implemented yet)", Toast.LENGTH_SHORT).show();
+            openFile(item);
+        }
+    }
+
+    private void openFile(FileItem item) {
+        try {
+            File file = new File(item.getPath());
+            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
+            
+            String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
+            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension != null ? extension.toLowerCase() : "");
+            
+            if (mimeType == null) {
+                mimeType = "*/*";
+            }
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri, mimeType);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            
+            startActivity(Intent.createChooser(intent, "Open with"));
+        } catch (Exception e) {
+            Toast.makeText(this, "Cannot open file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
         }
     }
 
     @Override
     public void onItemLongClick(FileItem item) {
-        String[] options = {"Rename", "Move", "Copy", "Cut", "Delete", "Share", "Properties"};
+        List<String> baseOptions = new java.util.ArrayList<>(java.util.Arrays.asList("Rename", "Move", "Copy", "Cut", "Delete", "Share", "Properties", "Zip"));
+        if (!item.isDirectory() && item.getName().toLowerCase().endsWith(".zip")) {
+            baseOptions.add("Unzip (Extract)");
+        }
+        
+        String[] options = baseOptions.toArray(new String[0]);
+        
         new AlertDialog.Builder(this)
                 .setTitle(item.getName())
                 .setItems(options, (dialog, which) -> {
-                    if (which == 0) {
+                    String selected = options[which];
+                    if (selected.equals("Rename")) {
                         showRenameDialog(item);
-                    } else if (which == 1) {
+                    } else if (selected.equals("Move")) {
                         showMoveDialog(item);
-                    } else if (which == 2) {
+                    } else if (selected.equals("Copy")) {
                         showCopyDialog(item);
-                    } else if (which == 3) {
+                    } else if (selected.equals("Cut")) {
                         cutSourcePath = item.getPath();
                         Toast.makeText(this, item.getName() + " cut. Navigate to destination and tap Paste.", Toast.LENGTH_SHORT).show();
-                    } else if (which == 4) {
+                    } else if (selected.equals("Delete")) {
                         showDeleteConfirm(item);
-                    } else if (which == 5) {
+                    } else if (selected.equals("Share")) {
                         shareFile(item);
-                    } else {
+                    } else if (selected.equals("Properties")) {
                         showPropertiesDialog(item);
+                    } else if (selected.equals("Zip")) {
+                        showZipDialog(java.util.Collections.singletonList(item.getPath()));
+                    } else if (selected.equals("Unzip (Extract)")) {
+                        showUnzipDialog(item.getPath());
                     }
                 })
                 .show();
@@ -443,6 +517,51 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
                 .setTitle("Delete " + paths.size() + " items?")
                 .setMessage("Selected items will be moved to Trash.")
                 .setPositiveButton("Delete", (d, w) -> runBulkDelete(paths))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void bulkZip() {
+        List<String> paths = adapter.getSelectedPaths();
+        if (paths.isEmpty()) {
+            Toast.makeText(this, "No items selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        showZipDialog(paths);
+        adapter.exitSelectionMode();
+    }
+
+    private void showZipDialog(List<String> paths) {
+        EditText input = new EditText(this);
+        input.setHint("Archive name (e.g. backup)");
+        new AlertDialog.Builder(this)
+                .setTitle("Compress " + paths.size() + " item(s)")
+                .setView(input)
+                .setPositiveButton("Zip", (dialog, which) -> {
+                    String name = input.getText().toString().trim();
+                    if (name.isEmpty()) name = "archive";
+                    if (!name.endsWith(".zip")) name += ".zip";
+                    
+                    String dest = currentPath + "/" + name;
+                    FileOperation op = new com.example.myfile.domain.operation.ZipOperation(paths, dest);
+                    runOperationWithProgress(op, "Compressing...", "Zipped successfully", "Zip failed");
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showUnzipDialog(String zipPath) {
+        File zipFile = new File(zipPath);
+        String nameWithoutExt = zipFile.getName().replace(".zip", "");
+        String defaultDest = currentPath + "/" + nameWithoutExt;
+        
+        new AlertDialog.Builder(this)
+                .setTitle("Extract " + zipFile.getName())
+                .setMessage("Extract to: " + defaultDest + " ?")
+                .setPositiveButton("Extract", (dialog, which) -> {
+                    FileOperation op = new com.example.myfile.domain.operation.UnzipOperation(zipPath, defaultDest);
+                    runOperationWithProgress(op, "Extracting...", "Extracted successfully", "Extraction failed");
+                })
                 .setNegativeButton("Cancel", null)
                 .show();
     }
@@ -708,6 +827,25 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
                 + "\nSize: " + sizeText
                 + "\nLast modified: " + dateText
                 + itemCountText;
+                
+        if (!item.isDirectory() && (item.getName().toLowerCase().endsWith(".jpg") || item.getName().toLowerCase().endsWith(".jpeg"))) {
+            try {
+                ExifInterface exif = new ExifInterface(item.getPath());
+                String width = exif.getAttribute(ExifInterface.TAG_IMAGE_WIDTH);
+                String height = exif.getAttribute(ExifInterface.TAG_IMAGE_LENGTH);
+                String dateTaken = exif.getAttribute(ExifInterface.TAG_DATETIME);
+                String make = exif.getAttribute(ExifInterface.TAG_MAKE);
+                String model = exif.getAttribute(ExifInterface.TAG_MODEL);
+                
+                message += "\n\n--- EXIF Data ---";
+                if (width != null && height != null) message += "\nResolution: " + width + "x" + height;
+                if (dateTaken != null) message += "\nDate Taken: " + dateTaken;
+                if (make != null) message += "\nMake: " + make;
+                if (model != null) message += "\nModel: " + model;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         new AlertDialog.Builder(this)
                 .setTitle("Properties")
@@ -758,6 +896,9 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
                     }
                     FileOperation operation = new CreateFileOperation(fileRepository, currentPath, fileName);
                     runOperation(operation, "File created", "Create failed (name already exists?)");
+                    
+                    String newFilePath = currentPath + "/" + fileName;
+                    android.media.MediaScannerConnection.scanFile(this, new String[]{newFilePath}, null, null);
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
