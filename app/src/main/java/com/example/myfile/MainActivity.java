@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
     private TextView tvCurrentPath;
     private LinearLayout emptyState;
     private LinearLayout selectionToolbar;
-    private LinearLayout normalToolbar;
+    private LinearLayout quickActionsContainer;
     private TextView tvSelectionCount;
     private String rootPath;
     private String currentPath;
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         tvCurrentPath = findViewById(R.id.tvCurrentPath);
         emptyState = findViewById(R.id.emptyState);
         selectionToolbar = findViewById(R.id.selectionToolbar);
-        normalToolbar = findViewById(R.id.normalToolbar);
+        quickActionsContainer = findViewById(R.id.quickActionsContainer);
         tvSelectionCount = findViewById(R.id.tvSelectionCount);
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
@@ -133,12 +133,95 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         });
 
         setupBrowseFeatures();
+        setupBottomNavigation();
+    }
+    
+    private boolean isRecentTab = false;
+
+    private void setupBottomNavigation() {
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = findViewById(R.id.bottomNavigation);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_recent) {
+                switchToRecent();
+                return true;
+            } else if (id == R.id.nav_browse) {
+                switchToBrowse();
+                return true;
+            }
+            return false;
+        });
+        bottomNav.setSelectedItemId(R.id.nav_browse);
+    }
+
+    private void switchToRecent() {
+        isRecentTab = true;
+        TextView tvTitle = findViewById(R.id.tvToolbarTitle);
+        if (tvTitle != null) tvTitle.setText("Recent");
+        
+        findViewById(R.id.breadcrumbScroll).setVisibility(View.GONE);
+        findViewById(R.id.quickActionsContainer).setVisibility(View.GONE);
+        
+        adapter.setRecentMode(true);
+        loadRecentFiles();
+    }
+
+    private void switchToBrowse() {
+        isRecentTab = false;
+        TextView tvTitle = findViewById(R.id.tvToolbarTitle);
+        if (tvTitle != null) tvTitle.setText("My File");
+        
+        findViewById(R.id.breadcrumbScroll).setVisibility(View.VISIBLE);
+        findViewById(R.id.quickActionsContainer).setVisibility(View.VISIBLE);
+        
+        adapter.setRecentMode(false);
+        if (currentPath == null) {
+            currentPath = rootPath;
+        }
+        loadFiles(currentPath);
+    }
+
+    private void loadRecentFiles() {
+        List<FileItem> recent = new ArrayList<>();
+        String[] projection = {
+            android.provider.MediaStore.Files.FileColumns.DATA,
+            android.provider.MediaStore.Files.FileColumns.DATE_MODIFIED,
+            android.provider.MediaStore.Files.FileColumns.SIZE
+        };
+        String sortOrder = android.provider.MediaStore.Files.FileColumns.DATE_MODIFIED + " DESC LIMIT 100";
+        String selection = android.provider.MediaStore.Files.FileColumns.DATA + " NOT LIKE '%/.thumbnails/%' AND " +
+                           android.provider.MediaStore.Files.FileColumns.MIME_TYPE + " IS NOT NULL";
+        
+        try (android.database.Cursor cursor = getContentResolver().query(
+                android.provider.MediaStore.Files.getContentUri("external"),
+                projection, selection, null, sortOrder)) {
+            
+            if (cursor != null) {
+                int dataIndex = cursor.getColumnIndexOrThrow(android.provider.MediaStore.Files.FileColumns.DATA);
+                while (cursor.moveToNext()) {
+                    String p = cursor.getString(dataIndex);
+                    if (p != null) {
+                        java.io.File f = new java.io.File(p);
+                        if (f.exists() && f.isFile()) {
+                            recent.add(FileItem.fromFile(f));
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        List<FileItem> grouped = groupFilesByDate(recent);
+        adapter.updateData(grouped);
+        emptyState.setVisibility(grouped.isEmpty() ? View.VISIBLE : View.GONE);
+        findViewById(R.id.btnBack).setVisibility(View.GONE);
     }
 
     private void checkPermissionAndLoad() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
-                loadFiles(rootPath);
+                if (isRecentTab) loadRecentFiles(); else loadFiles(rootPath);
             } else {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.setData(Uri.parse("package:" + getPackageName()));
@@ -148,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
             boolean readGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
             boolean writeGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
             if (readGranted && writeGranted) {
-                loadFiles(rootPath);
+                if (isRecentTab) loadRecentFiles(); else loadFiles(rootPath);
             } else {
                 ActivityCompat.requestPermissions(this, new String[]{
                         Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -206,7 +289,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         if (requestCode == 101 && grantResults.length >= 2
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED
                 && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-            loadFiles(rootPath);
+            if (isRecentTab) loadRecentFiles(); else loadFiles(rootPath);
         } else {
             Toast.makeText(this, "Permission denied, cannot read/write files", Toast.LENGTH_LONG).show();
         }
@@ -340,11 +423,13 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
     public void onSelectionChanged(boolean selectionMode, int count) {
         if (selectionMode) {
             selectionToolbar.setVisibility(View.VISIBLE);
-            normalToolbar.setVisibility(View.GONE);
+            quickActionsContainer.setVisibility(View.GONE);
             tvSelectionCount.setText(count + " selected");
         } else {
             selectionToolbar.setVisibility(View.GONE);
-            normalToolbar.setVisibility(View.VISIBLE);
+            if (!isRecentTab) {
+                quickActionsContainer.setVisibility(View.VISIBLE);
+            }
         }
     }
 

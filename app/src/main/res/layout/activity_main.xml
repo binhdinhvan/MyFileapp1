@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -54,6 +55,7 @@
                 android:layout_marginStart="4dp">
 
                 <TextView
+                    android:id="@+id/tvToolbarTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="My File"
@@ -199,7 +201,7 @@
 
         
         <LinearLayout
-            android:id="@+id/normalToolbar"
+            android:id="@+id/quickActionsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -311,6 +313,16 @@
                     android:textSize="13sp" />
             </LinearLayout>
         </FrameLayout>
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            app:menu="@menu/menu_bottom_nav"
+            app:itemIconTint="@color/blue_primary"
+            app:itemTextColor="@color/blue_primary"
+            app:labelVisibilityMode="labeled" />
 
     </LinearLayout>
 

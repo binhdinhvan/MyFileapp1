@@ -56,6 +56,8 @@ public class SearchActivity extends AppCompatActivity {
     
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Future<?> currentSearchTask;
+    private String currentCategory = null;
+    private TextView chipSelectedCategory;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +72,8 @@ public class SearchActivity extends AppCompatActivity {
         layoutLoading = findViewById(R.id.layoutLoading);
         tvResultsCount = findViewById(R.id.tvResultsCount);
         rvSearchResults = findViewById(R.id.rvSearchResults);
+        chipSelectedCategory = findViewById(R.id.chipSelectedCategory);
+        chipSelectedCategory.setOnClickListener(v -> clearCategory());
         
         adapter = new FileAdapter(searchResults, new FileAdapter.OnItemClickListener() {
             @Override
@@ -97,7 +101,11 @@ public class SearchActivity extends AppCompatActivity {
         
         btnClear.setOnClickListener(v -> {
             etSearchQuery.setText("");
-            showSuggestions();
+            if (currentCategory != null) {
+                clearCategory();
+            } else {
+                showSuggestions();
+            }
         });
         
         findViewById(R.id.btnClearRecent).setOnClickListener(v -> {
@@ -110,7 +118,7 @@ public class SearchActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                btnClear.setVisibility(s.length() > 0 ? View.VISIBLE : View.GONE);
+                btnClear.setVisibility((s.length() > 0 || currentCategory != null) ? View.VISIBLE : View.GONE);
                 
                 if (isProgrammaticTextChange) {
                     return;
@@ -121,10 +129,10 @@ public class SearchActivity extends AppCompatActivity {
                 }
                 
                 String query = s.toString().trim();
-                if (query.isEmpty()) {
+                if (query.isEmpty() && currentCategory == null) {
                     showSuggestions();
                 } else {
-                    searchRunnable = () -> performSearch(query, null);
+                    searchRunnable = () -> performSearch(query, currentCategory);
                     searchHandler.postDelayed(searchRunnable, 500); // 500ms delay before triggering search
                 }
             }
@@ -135,8 +143,8 @@ public class SearchActivity extends AppCompatActivity {
         etSearchQuery.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 String query = etSearchQuery.getText().toString().trim();
-                if (!query.isEmpty()) {
-                    performSearch(query, null);
+                if (!query.isEmpty() || currentCategory != null) {
+                    performSearch(query, currentCategory);
                 }
                 return true;
             }
@@ -149,13 +157,35 @@ public class SearchActivity extends AppCompatActivity {
     }
     
     private void setupChips() {
-        findViewById(R.id.chipDocs).setOnClickListener(v -> performSearch(null, "docs"));
-        findViewById(R.id.chipImages).setOnClickListener(v -> performSearch(null, "images"));
-        findViewById(R.id.chipVideos).setOnClickListener(v -> performSearch(null, "videos"));
-        findViewById(R.id.chipMusic).setOnClickListener(v -> performSearch(null, "music"));
-        findViewById(R.id.chipArchives).setOnClickListener(v -> performSearch(null, "archives"));
-        findViewById(R.id.chipApks).setOnClickListener(v -> performSearch(null, "apks"));
-        findViewById(R.id.chipFolders).setOnClickListener(v -> performSearch(null, "folders"));
+        findViewById(R.id.chipDocs).setOnClickListener(v -> setCategory("docs", "Docs"));
+        findViewById(R.id.chipImages).setOnClickListener(v -> setCategory("images", "Images"));
+        findViewById(R.id.chipVideos).setOnClickListener(v -> setCategory("videos", "Videos"));
+        findViewById(R.id.chipMusic).setOnClickListener(v -> setCategory("music", "Music"));
+        findViewById(R.id.chipArchives).setOnClickListener(v -> setCategory("archives", "Archives"));
+        findViewById(R.id.chipApks).setOnClickListener(v -> setCategory("apks", "APKs"));
+        findViewById(R.id.chipFolders).setOnClickListener(v -> setCategory("folders", "Folders"));
+    }
+    
+    private void setCategory(String category, String displayName) {
+        currentCategory = category;
+        chipSelectedCategory.setText(displayName);
+        chipSelectedCategory.setVisibility(View.VISIBLE);
+        btnClear.setVisibility(View.VISIBLE);
+        etSearchQuery.setText("");
+        etSearchQuery.requestFocus();
+        performSearch("", currentCategory);
+    }
+    
+    private void clearCategory() {
+        currentCategory = null;
+        chipSelectedCategory.setVisibility(View.GONE);
+        String query = etSearchQuery.getText().toString().trim();
+        if (query.isEmpty()) {
+            btnClear.setVisibility(View.GONE);
+            showSuggestions();
+        } else {
+            performSearch(query, null);
+        }
     }
     
     private void showSuggestions() {
@@ -180,12 +210,7 @@ public class SearchActivity extends AppCompatActivity {
             currentSearchTask.cancel(true);
         }
         
-        if (category != null) {
-            isProgrammaticTextChange = true;
-            etSearchQuery.setText(category.substring(0, 1).toUpperCase() + category.substring(1));
-            etSearchQuery.setSelection(etSearchQuery.getText().length());
-            isProgrammaticTextChange = false;
-        } else if (query != null && !query.isEmpty()) {
+        if (query != null && !query.isEmpty()) {
             saveRecentQuery(query);
         }
         
@@ -224,24 +249,34 @@ public class SearchActivity extends AppCompatActivity {
             if (Thread.currentThread().isInterrupted()) return;
             
             boolean match = false;
-            if (query != null && !query.isEmpty()) {
-                if (f.getName().toLowerCase(Locale.getDefault()).contains(query.toLowerCase(Locale.getDefault()))) {
-                    match = true;
-                }
-            } else if (category != null) {
+            boolean matchCategory = true;
+            boolean matchQuery = true;
+            
+            if (category != null) {
+                matchCategory = false;
                 if (f.isDirectory() && category.equals("folders")) {
-                    match = true;
+                    matchCategory = true;
                 } else if (!f.isDirectory()) {
                     String ext = getExtension(f.getName()).toLowerCase();
                     switch (category) {
-                        case "docs": match = Arrays.asList("doc","docx","pdf","txt","xls","xlsx","ppt","pptx").contains(ext); break;
-                        case "images": match = Arrays.asList("jpg","jpeg","png","gif","webp").contains(ext); break;
-                        case "videos": match = Arrays.asList("mp4","mkv","avi","mov").contains(ext); break;
-                        case "music": match = Arrays.asList("mp3","wav","flac","ogg","m4a").contains(ext); break;
-                        case "archives": match = Arrays.asList("zip","rar","7z","tar","gz").contains(ext); break;
-                        case "apks": match = ext.equals("apk"); break;
+                        case "docs": matchCategory = Arrays.asList("doc","docx","pdf","txt","xls","xlsx","ppt","pptx").contains(ext); break;
+                        case "images": matchCategory = Arrays.asList("jpg","jpeg","png","gif","webp").contains(ext); break;
+                        case "videos": matchCategory = Arrays.asList("mp4","mkv","avi","mov").contains(ext); break;
+                        case "music": matchCategory = Arrays.asList("mp3","wav","flac","ogg","m4a").contains(ext); break;
+                        case "archives": matchCategory = Arrays.asList("zip","rar","7z","tar","gz").contains(ext); break;
+                        case "apks": matchCategory = ext.equals("apk"); break;
                     }
                 }
+            }
+            
+            if (query != null && !query.isEmpty()) {
+                if (!f.getName().toLowerCase(Locale.getDefault()).contains(query.toLowerCase(Locale.getDefault()))) {
+                    matchQuery = false;
+                }
+            }
+            
+            if (matchCategory && matchQuery && (category != null || (query != null && !query.isEmpty()))) {
+                match = true;
             }
             
             if (match) {

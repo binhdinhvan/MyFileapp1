@@ -13,8 +13,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:background="#FFFFFF"
-        android:padding="8dp"
-        android:elevation="4dp">
+        android:padding="8dp">
 
         <TextView
             android:id="@+id/btnBack"
@@ -26,30 +25,65 @@
             android:textColor="#333333"
             android:background="?attr/selectableItemBackgroundBorderless" />
 
-        <EditText
-            android:id="@+id/etSearchQuery"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
-            android:background="@null"
-            android:hint="Search files"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:singleLine="true"
-            android:imeOptions="actionSearch"
-            android:textColor="#333333"
-            android:textSize="16sp" />
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_search_pill"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp">
 
-        <TextView
-            android:id="@+id/btnClear"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:gravity="center"
-            android:text="✕"
-            android:textSize="18sp"
-            android:textColor="#9E9E9E"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:visibility="gone" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&#128269;"
+                android:textSize="16sp"
+                android:textColor="#9E9E9E" />
+
+            <TextView
+                android:id="@+id/chipSelectedCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_category_chip"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:text="Images"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/etSearchQuery"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:background="@null"
+                android:hint="Search files"
+                android:singleLine="true"
+                android:imeOptions="actionSearch"
+                android:textColor="#333333"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/btnClear"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:gravity="center"
+                android:text="✕"
+                android:textSize="16sp"
+                android:textColor="#9E9E9E"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
 
     <FrameLayout

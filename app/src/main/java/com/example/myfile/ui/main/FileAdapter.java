@@ -30,6 +30,7 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private boolean selectionMode = false;
     private final Set<String> selectedPaths = new HashSet<>();
     private int viewMode = 0; 
+    private boolean isRecentMode = false;
 
     public FileAdapter(List<FileItem> items, OnItemClickListener listener) {
         this.items = items;
@@ -43,6 +44,11 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public void setViewMode(int mode) {
         this.viewMode = mode;
+        notifyDataSetChanged();
+    }
+
+    public void setRecentMode(boolean recentMode) {
+        this.isRecentMode = recentMode;
         notifyDataSetChanged();
     }
 
@@ -126,9 +132,15 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     ContextCompat.getDrawable(itemHolder.itemView.getContext(), R.drawable.bg_badge_folder));
         } else {
             itemHolder.tvName.setTextColor(0xFF212121);
-            String date = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(item.getLastModified());
             String sizeText = formatSize(item.getSize());
-            itemHolder.tvDetail.setText(date + "  |  " + sizeText);
+            if (isRecentMode) {
+                java.io.File f = new java.io.File(item.getPath());
+                String parentName = f.getParentFile() != null ? f.getParentFile().getName() : "Unknown";
+                itemHolder.tvDetail.setText(sizeText + "  |  " + parentName);
+            } else {
+                String date = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(item.getLastModified());
+                itemHolder.tvDetail.setText(date + "  |  " + sizeText);
+            }
             itemHolder.tvBadge.setText(getBadgeLabel(item.getName()));
             itemHolder.tvBadge.setTextSize(22);
             itemHolder.tvBadge.setBackground(
