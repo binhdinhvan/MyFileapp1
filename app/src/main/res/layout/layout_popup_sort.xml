@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="240dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_card_item"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:elevation="8dp">
+
+    <!-- VIEW MODE -->
+    <LinearLayout android:id="@+id/menu_grid" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Grid" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_grid" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/menu_large_grid" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Large Grid" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_large_grid" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/menu_list" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="List" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_list" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginTop="4dp" android:layout_marginBottom="4dp" />
+
+    <!-- SORT FIELD -->
+    <LinearLayout android:id="@+id/menu_name" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Name" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/menu_size" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Size" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_size" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/menu_time" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Time modified" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_time" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/menu_type" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Type" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_type" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginTop="4dp" android:layout_marginBottom="4dp" />
+
+    <!-- SORT DIR -->
+    <LinearLayout android:id="@+id/menu_forward" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Forward" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_forward" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/menu_reverse" android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingStart="16dp" android:paddingEnd="16dp" android:background="?attr/selectableItemBackground">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Reverse" android:textColor="@color/black" android:textSize="15sp" />
+        <TextView android:id="@+id/check_reverse" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="&#10003;" android:textColor="#1976D2" android:textSize="16sp" android:textStyle="bold" android:visibility="invisible" />
+    </LinearLayout>
+
+</LinearLayout>

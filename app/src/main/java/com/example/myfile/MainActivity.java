@@ -17,6 +17,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.PopupWindow;
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -26,6 +27,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.myfile.data.model.FileItem;
 import com.example.myfile.data.repository.FileRepository;
@@ -45,6 +47,7 @@ import com.example.myfile.data.storage.StorageHelper;
 import com.example.myfile.ui.storage.QuickFolderAdapter;
 import com.example.myfile.ui.storage.StorageAdapter;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,13 +75,12 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
     private static final int BULK_MOVE_REQUEST_CODE = 202;
     private static final int BULK_COPY_REQUEST_CODE = 203;
 
-    // === Browse & Navigation (Thanh vien A) ===
     private DrawerLayout drawerLayout;
     private HorizontalScrollView breadcrumbScroll;
     private LinearLayout breadcrumbContainer;
-    private SortMode sortMode = SortMode.NAME_ASC;
+    private SortMode sortMode = SortMode.DATE_DESC;
     private String searchQuery = "";
-    private boolean isGrid = false;
+    private int viewMode = 0; // 0: List, 1: Grid (3 cols), 2: Large Grid (2 cols)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +113,9 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         findViewById(R.id.btnSelCopy).setOnClickListener(v -> bulkCopy());
         findViewById(R.id.btnTrash).setOnClickListener(v -> startActivity(new Intent(this, TrashActivity.class)));
         findViewById(R.id.btnBack).setOnClickListener(v -> navigateUp());
-
+        findViewById(R.id.btnSearchIcon).setOnClickListener(v -> startActivity(new Intent(this, SearchActivity.class)));
+        findViewById(R.id.btnSortMenu).setOnClickListener(v -> showSortMenu(v));
+        
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -214,6 +218,10 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         List<FileItem> items = fileRepository.list(path);
         items = FileListHelper.sort(items, sortMode);
         items = FileListHelper.filter(items, searchQuery);
+        if (!path.equals(rootPath)) {
+            items = groupFilesByDate(items);
+        }
+        
         updateBreadcrumb(path);
         adapter.updateData(items);
         emptyState.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
@@ -229,6 +237,68 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
                 loadFiles(rootPath);
             }
         }
+    }
+
+    private List<FileItem> groupFilesByDate(List<FileItem> original) {
+        if (original.isEmpty()) return original;
+        
+        List<FileItem> folders = new ArrayList<>();
+        List<FileItem> filesToGroup = new ArrayList<>();
+        for (FileItem item : original) {
+            if (item.isDirectory()) {
+                folders.add(item);
+            } else {
+                filesToGroup.add(item);
+            }
+        }
+        
+        // Sort files by date descending before grouping
+        java.util.Collections.sort(filesToGroup, (f1, f2) -> Long.compare(f2.getLastModified(), f1.getLastModified()));
+        
+        List<FileItem> finalItems = new ArrayList<>(folders);
+        
+        if (filesToGroup.isEmpty()) {
+            return finalItems;
+        }
+
+        java.util.Map<String, List<FileItem>> groups = new java.util.LinkedHashMap<>();
+        
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        cal.set(java.util.Calendar.MINUTE, 0);
+        cal.set(java.util.Calendar.SECOND, 0);
+        cal.set(java.util.Calendar.MILLISECOND, 0);
+        long todayStart = cal.getTimeInMillis();
+        long yesterdayStart = todayStart - 86400000L;
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd", java.util.Locale.getDefault());
+        
+        for (FileItem item : filesToGroup) {
+            long time = item.getLastModified();
+            String groupName;
+            if (time >= todayStart) {
+                groupName = "Today";
+            } else if (time >= yesterdayStart) {
+                groupName = "Yesterday";
+            } else if (time >= todayStart - 7L * 86400000L) {
+                int days = (int) ((todayStart - time) / 86400000L) + 1;
+                groupName = days + " days ago";
+            } else {
+                groupName = sdf.format(new java.util.Date(time));
+            }
+            
+            if (!groups.containsKey(groupName)) {
+                groups.put(groupName, new ArrayList<>());
+            }
+            groups.get(groupName).add(item);
+        }
+        
+        for (java.util.Map.Entry<String, List<FileItem>> entry : groups.entrySet()) {
+            String title = entry.getKey() + "  |  " + entry.getValue().size() + " items";
+            finalItems.add(new FileItem(title));
+            finalItems.addAll(entry.getValue());
+        }
+        
+        return finalItems;
     }
 
     @Override
@@ -626,10 +696,9 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         startActivity(Intent.createChooser(intent, "Share " + item.getName()));
     }
 
-    // ===================== Browse & Navigation (Thanh vien A) =====================
 
     private void setupBrowseFeatures() {
-        // Drawer + danh sach storage
+
         drawerLayout = findViewById(R.id.drawerLayout);
         findViewById(R.id.btnMenu).setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
 
@@ -651,70 +720,92 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
             drawerLayout.closeDrawer(GravityCompat.START);
         }));
 
-        // Breadcrumb
         breadcrumbScroll = findViewById(R.id.breadcrumbScroll);
         breadcrumbContainer = findViewById(R.id.breadcrumbContainer);
 
-        // Sort + doi List/Grid
-        findViewById(R.id.btnSort).setOnClickListener(v -> showSortDialog());
-        findViewById(R.id.btnViewToggle).setOnClickListener(v -> toggleViewMode());
 
-        // Tim kiem
-        EditText etSearch = findViewById(R.id.etSearch);
-        etSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                searchQuery = s.toString();
-                if (currentPath != null) {
-                    loadFiles(currentPath);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-        findViewById(R.id.btnClearSearch).setOnClickListener(v -> etSearch.setText(""));
-
-        // Neu da load truoc do (co quyen ngay tu dau) thi ve breadcrumb luon
         if (currentPath != null) {
             updateBreadcrumb(currentPath);
         }
     }
 
-    private void showSortDialog() {
-        final SortMode[] modes = SortMode.values();
-        String[] labels = new String[modes.length];
-        for (int i = 0; i < modes.length; i++) {
-            labels[i] = modes[i].label;
+    private void showSortMenu(View anchor) {
+        View popupView = getLayoutInflater().inflate(R.layout.layout_popup_sort, null);
+        PopupWindow popupWindow = new PopupWindow(popupView, 
+                LinearLayout.LayoutParams.WRAP_CONTENT, 
+                LinearLayout.LayoutParams.WRAP_CONTENT, true);
+        
+        popupView.findViewById(R.id.check_grid).setVisibility(viewMode == 1 ? View.VISIBLE : View.INVISIBLE);
+        popupView.findViewById(R.id.check_large_grid).setVisibility(viewMode == 2 ? View.VISIBLE : View.INVISIBLE);
+        popupView.findViewById(R.id.check_list).setVisibility(viewMode == 0 ? View.VISIBLE : View.INVISIBLE);
+
+        boolean isDesc = sortMode.name().endsWith("_DESC");
+        String field = sortMode.name().split("_")[0]; 
+
+        popupView.findViewById(R.id.check_name).setVisibility("NAME".equals(field) ? View.VISIBLE : View.INVISIBLE);
+        popupView.findViewById(R.id.check_size).setVisibility("SIZE".equals(field) ? View.VISIBLE : View.INVISIBLE);
+        popupView.findViewById(R.id.check_time).setVisibility("DATE".equals(field) ? View.VISIBLE : View.INVISIBLE);
+        popupView.findViewById(R.id.check_type).setVisibility("TYPE".equals(field) ? View.VISIBLE : View.INVISIBLE);
+
+        popupView.findViewById(R.id.check_forward).setVisibility(!isDesc ? View.VISIBLE : View.INVISIBLE);
+        popupView.findViewById(R.id.check_reverse).setVisibility(isDesc ? View.VISIBLE : View.INVISIBLE);
+
+        popupView.findViewById(R.id.menu_grid).setOnClickListener(v -> { viewMode = 1; updateViewMode(); popupWindow.dismiss(); });
+        popupView.findViewById(R.id.menu_list).setOnClickListener(v -> { viewMode = 0; updateViewMode(); popupWindow.dismiss(); });
+        popupView.findViewById(R.id.menu_large_grid).setOnClickListener(v -> { viewMode = 2; updateViewMode(); popupWindow.dismiss(); });
+
+        popupView.findViewById(R.id.menu_name).setOnClickListener(v -> { updateSortMode("NAME", isDesc); popupWindow.dismiss(); });
+        popupView.findViewById(R.id.menu_size).setOnClickListener(v -> { updateSortMode("SIZE", isDesc); popupWindow.dismiss(); });
+        popupView.findViewById(R.id.menu_time).setOnClickListener(v -> { updateSortMode("DATE", isDesc); popupWindow.dismiss(); });
+        popupView.findViewById(R.id.menu_type).setOnClickListener(v -> { updateSortMode("TYPE", isDesc); popupWindow.dismiss(); });
+
+        popupView.findViewById(R.id.menu_forward).setOnClickListener(v -> { updateSortMode(field, false); popupWindow.dismiss(); });
+        popupView.findViewById(R.id.menu_reverse).setOnClickListener(v -> { updateSortMode(field, true); popupWindow.dismiss(); });
+
+        popupWindow.setElevation(16f);
+        popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        
+        int xOffset = -popupView.getMeasuredWidth() + anchor.getWidth();
+        popupWindow.showAsDropDown(anchor, xOffset, 0);
+    }
+    
+    private void updateSortMode(String field, boolean isDesc) {
+        if ("TYPE".equals(field)) field = "NAME"; 
+        String suffix = isDesc ? "_DESC" : "_ASC";
+        sortMode = SortMode.valueOf(field + suffix);
+        if (currentPath != null) {
+            loadFiles(currentPath);
         }
-        new AlertDialog.Builder(this)
-                .setTitle("Sap xep theo")
-                .setSingleChoiceItems(labels, sortMode.ordinal(), (d, which) -> {
-                    sortMode = modes[which];
-                    d.dismiss();
-                    if (currentPath != null) {
-                        loadFiles(currentPath);
-                    }
-                })
-                .setNegativeButton("Dong", null)
-                .show();
     }
 
-    private void toggleViewMode() {
-        isGrid = !isGrid;
+    private void updateViewMode() {
         RecyclerView rv = findViewById(R.id.recyclerView);
-        if (isGrid) {
-            rv.setLayoutManager(new GridLayoutManager(this, 3));
-        } else {
+        
+        if (viewMode == 0) {
             rv.setLayoutManager(new LinearLayoutManager(this));
+        } else if (viewMode == 1) {
+            GridLayoutManager glm = new GridLayoutManager(this, 3);
+            glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    if (adapter != null && adapter.getItemViewType(position) == 3) return 3;
+                    return 1;
+                }
+            });
+            rv.setLayoutManager(glm);
+        } else if (viewMode == 2) {
+            GridLayoutManager glm = new GridLayoutManager(this, 2);
+            glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    if (adapter != null && adapter.getItemViewType(position) == 3) return 2;
+                    return 1;
+                }
+            });
+            rv.setLayoutManager(glm);
         }
-        adapter.setGridMode(isGrid);
-        ((TextView) findViewById(R.id.btnViewToggle)).setText(isGrid ? "List" : "Grid");
+        
+        adapter.setViewMode(viewMode);
     }
 
     private void updateBreadcrumb(String path) {

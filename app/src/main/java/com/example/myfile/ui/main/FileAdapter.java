@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
+public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public interface OnItemClickListener {
         void onItemClick(FileItem item);
@@ -29,7 +29,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
     private final OnItemClickListener listener;
     private boolean selectionMode = false;
     private final Set<String> selectedPaths = new HashSet<>();
-    private int itemLayoutRes = R.layout.item_file;
+    private int viewMode = 0; 
 
     public FileAdapter(List<FileItem> items, OnItemClickListener listener) {
         this.items = items;
@@ -41,8 +41,8 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         notifyDataSetChanged();
     }
 
-    public void setGridMode(boolean grid) {
-        itemLayoutRes = grid ? R.layout.item_file_grid : R.layout.item_file;
+    public void setViewMode(int mode) {
+        this.viewMode = mode;
         notifyDataSetChanged();
     }
 
@@ -78,55 +78,82 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         listener.onSelectionChanged(true, selectedPaths.size());
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (items.get(position).isHeader()) return 3;
+        return viewMode;
+    }
+
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(itemLayoutRes, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == 3) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_date_header, parent, false);
+            return new HeaderViewHolder(view);
+        }
+        int res = (viewType == 0) ? R.layout.item_file : R.layout.item_file_grid;
+        View view = LayoutInflater.from(parent.getContext()).inflate(res, parent, false);
+        return new ItemViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         FileItem item = items.get(position);
-        holder.tvName.setText(item.getName());
+        
+        if (getItemViewType(position) == 3) {
+            HeaderViewHolder headerHolder = (HeaderViewHolder) holder;
+            headerHolder.tvHeaderTitle.setText(item.getHeaderTitle());
+            return;
+        }
+        
+        ItemViewHolder itemHolder = (ItemViewHolder) holder;
+        itemHolder.tvName.setText(item.getName());
 
         if (item.isDirectory()) {
-            holder.tvName.setTextColor(0xFF1976D2);
-            holder.tvDetail.setText("Folder");
-            holder.tvBadge.setText("\uD83D\uDCC1");
-            holder.tvBadge.setTextSize(22);
-            holder.tvBadge.setBackground(
-                    ContextCompat.getDrawable(holder.itemView.getContext(), R.drawable.bg_badge_folder));
+            itemHolder.tvName.setTextColor(0xFF1976D2);
+            String date = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(item.getLastModified());
+            int childCount = 0;
+            java.io.File f = new java.io.File(item.getPath());
+            if (f.exists() && f.isDirectory()) {
+                String[] children = f.list();
+                if (children != null) childCount = children.length;
+            }
+            String countText = childCount == 1 ? "1 item" : childCount + " items";
+            itemHolder.tvDetail.setText(date + "  |  " + countText);
+            itemHolder.tvBadge.setText("\uD83D\uDCC1");
+            itemHolder.tvBadge.setTextSize(22);
+            itemHolder.tvBadge.setBackground(
+                    ContextCompat.getDrawable(itemHolder.itemView.getContext(), R.drawable.bg_badge_folder));
         } else {
-            holder.tvName.setTextColor(0xFF212121);
-            String date = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(item.getLastModified());
+            itemHolder.tvName.setTextColor(0xFF212121);
+            String date = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(item.getLastModified());
             String sizeText = formatSize(item.getSize());
-            holder.tvDetail.setText(sizeText + "  |  " + date);
-            holder.tvBadge.setText(getBadgeLabel(item.getName()));
-            holder.tvBadge.setTextSize(22);
-            holder.tvBadge.setBackground(
-                    ContextCompat.getDrawable(holder.itemView.getContext(), getBadgeDrawable(item.getName())));
+            itemHolder.tvDetail.setText(date + "  |  " + sizeText);
+            itemHolder.tvBadge.setText(getBadgeLabel(item.getName()));
+            itemHolder.tvBadge.setTextSize(22);
+            itemHolder.tvBadge.setBackground(
+                    ContextCompat.getDrawable(itemHolder.itemView.getContext(), getBadgeDrawable(item.getName())));
         }
 
         boolean isSelected = selectedPaths.contains(item.getPath());
-        holder.itemView.setAlpha(isSelected ? 0.85f : 1.0f);
-        // Tint the card border to blue when selected
-        if (isSelected) {
-            holder.itemView.setBackgroundResource(R.drawable.bg_card_selected);
-        } else {
-            holder.itemView.setBackgroundResource(R.drawable.bg_card_item);
-        }
-        holder.tvCheck.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
-        holder.tvCheck.setChecked(isSelected);
+        itemHolder.itemView.setAlpha(isSelected ? 0.85f : 1.0f);
 
-        holder.itemView.setOnClickListener(v -> {
+        if (isSelected) {
+            itemHolder.itemView.setBackgroundResource(R.drawable.bg_card_selected);
+        } else {
+            itemHolder.itemView.setBackgroundResource(R.drawable.bg_card_item);
+        }
+        itemHolder.tvCheck.setVisibility(selectionMode ? View.VISIBLE : View.GONE);
+        itemHolder.tvCheck.setChecked(isSelected);
+
+        itemHolder.itemView.setOnClickListener(v -> {
             if (selectionMode) {
                 toggleSelection(item);
             } else {
                 listener.onItemClick(item);
             }
         });
-        holder.itemView.setOnLongClickListener(v -> {
+        itemHolder.itemView.setOnLongClickListener(v -> {
             if (selectionMode) {
                 toggleSelection(item);
             } else {
@@ -165,7 +192,7 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         return "\uD83D\uDCC4";
     }
 
-    /** @deprecated kept for compatibility */
+    
     private String getBadgeEmoji(String name) {
         return getBadgeLabel(name);
     }
@@ -182,12 +209,12 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         return R.drawable.bg_badge_file;
     }
 
-    /** @deprecated use getBadgeEmoji + getBadgeDrawable instead */
+    
     private String getBadgeText(String name) {
         return getBadgeEmoji(name);
     }
 
-    /** @deprecated use getBadgeDrawable instead */
+    
     private int getBadgeColor(String name) {
         return 0xFFFFF3E0;
     }
@@ -201,18 +228,27 @@ public class FileAdapter extends RecyclerView.Adapter<FileAdapter.ViewHolder> {
         return String.format(Locale.getDefault(), "%.1f %s", bytes / Math.pow(1024, exp), unit);
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ItemViewHolder extends RecyclerView.ViewHolder {
         TextView tvBadge;
         TextView tvName;
         TextView tvDetail;
         CheckBox tvCheck;
 
-        ViewHolder(View itemView) {
+        ItemViewHolder(View itemView) {
             super(itemView);
             tvBadge = itemView.findViewById(R.id.tvBadge);
             tvName = itemView.findViewById(R.id.tvName);
             tvDetail = itemView.findViewById(R.id.tvDetail);
             tvCheck = itemView.findViewById(R.id.tvCheck);
+        }
+    }
+    
+    static class HeaderViewHolder extends RecyclerView.ViewHolder {
+        TextView tvHeaderTitle;
+        
+        HeaderViewHolder(View itemView) {
+            super(itemView);
+            tvHeaderTitle = itemView.findViewById(R.id.tvHeaderTitle);
         }
     }
 }

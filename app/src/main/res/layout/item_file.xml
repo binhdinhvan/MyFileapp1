@@ -27,7 +27,7 @@
             android:focusable="false"
             android:visibility="gone" />
 
-        <!-- Type badge -->
+        
         <TextView
             android:id="@+id/tvBadge"
             android:layout_width="48dp"
@@ -38,7 +38,7 @@
             android:textColor="@color/badge_folder_text"
             android:background="@drawable/bg_badge_folder" />
 
-        <!-- Name + detail -->
+        
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
@@ -67,7 +67,7 @@
                 android:ellipsize="end" />
         </LinearLayout>
 
-        <!-- Chevron -->
+        
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

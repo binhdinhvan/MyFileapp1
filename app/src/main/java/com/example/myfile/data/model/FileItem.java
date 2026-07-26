@@ -8,6 +8,8 @@ public class FileItem {
     private final boolean isDirectory;
     private final long size;
     private final long lastModified;
+    private final boolean isHeader;
+    private final String headerTitle;
 
     public FileItem(String name, String path, boolean isDirectory, long size, long lastModified) {
         this.name = name;
@@ -15,6 +17,18 @@ public class FileItem {
         this.isDirectory = isDirectory;
         this.size = size;
         this.lastModified = lastModified;
+        this.isHeader = false;
+        this.headerTitle = null;
+    }
+    
+    public FileItem(String headerTitle) {
+        this.name = "";
+        this.path = "";
+        this.isDirectory = false;
+        this.size = 0;
+        this.lastModified = 0;
+        this.isHeader = true;
+        this.headerTitle = headerTitle;
     }
 
     public static FileItem fromFile(File file) {
@@ -44,5 +58,13 @@ public class FileItem {
 
     public long getLastModified() {
         return lastModified;
+    }
+    
+    public boolean isHeader() {
+        return isHeader;
+    }
+    
+    public String getHeaderTitle() {
+        return headerTitle;
     }
 }

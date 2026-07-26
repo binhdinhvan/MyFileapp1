@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- MAIN CONTENT -->
+    
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/bg_surface">
 
-        <!-- TOP APP BAR -->
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -71,18 +71,29 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/btnTrash"
+                android:id="@+id/btnSearchIcon"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:gravity="center"
-                android:text="&#128465;"
+                android:text="&#128269;"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Search" />
+                
+            <TextView
+                android:id="@+id/btnSortMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:gravity="center"
+                android:text="&#8645;"
                 android:textSize="20sp"
                 android:textColor="#FFFFFF"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Trash" />
+                android:contentDescription="Sort and View" />
         </LinearLayout>
 
-        <!-- BREADCRUMB -->
+        
         <HorizontalScrollView
             android:id="@+id/breadcrumbScroll"
             android:layout_width="match_parent"
@@ -102,7 +113,7 @@
                 android:paddingEnd="12dp" />
         </HorizontalScrollView>
 
-        <!-- hidden legacy path view kept for code compatibility -->
+        
         <TextView
             android:id="@+id/tvCurrentPath"
             android:layout_width="match_parent"
@@ -110,92 +121,9 @@
             android:textSize="12sp"
             android:visibility="gone" />
 
-        <!-- SEARCH AND ACTIONS BAR -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="#FFFFFF"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:elevation="1dp">
+        
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/bg_search_box"
-                android:paddingStart="14dp"
-                android:paddingEnd="4dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="&#128269;"
-                    android:textSize="15sp"
-                    android:textColor="@color/blue_primary" />
-
-                <EditText
-                    android:id="@+id/etSearch"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    android:hint="Search..."
-                    android:textSize="13sp"
-                    android:textColor="@color/black"
-                    android:textColorHint="@color/text_hint"
-                    android:maxLines="1"
-                    android:inputType="text"
-                    android:imeOptions="actionSearch"
-                    android:background="@null" />
-
-                <TextView
-                    android:id="@+id/btnClearSearch"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:gravity="center"
-                    android:text="&#10005;"
-                    android:textColor="@color/text_hint"
-                    android:textSize="14sp"
-                    android:background="?attr/selectableItemBackgroundBorderless" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/btnSort"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginStart="8dp"
-                android:gravity="center"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:text="Sort"
-                android:textColor="@color/blue_primary"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:background="@drawable/bg_action_pill" />
-
-            <TextView
-                android:id="@+id/btnViewToggle"
-                android:layout_width="wrap_content"
-                android:layout_height="36dp"
-                android:layout_marginStart="6dp"
-                android:gravity="center"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:text="Grid"
-                android:textColor="#7B1FA2"
-                android:textSize="12sp"
-                android:textStyle="bold"
-                android:background="@drawable/bg_action_pill" />
-        </LinearLayout>
-
-        <!-- SELECTION TOOLBAR hidden by default -->
+        
         <LinearLayout
             android:id="@+id/selectionToolbar"
             android:layout_width="match_parent"
@@ -269,7 +197,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless" />
         </LinearLayout>
 
-        <!-- NORMAL TOOLBAR action buttons -->
+        
         <LinearLayout
             android:id="@+id/normalToolbar"
             android:layout_width="match_parent"
@@ -333,7 +261,7 @@
                 android:background="@drawable/bg_action_pill" />
         </LinearLayout>
 
-        <!-- FILE LIST -->
+        
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -349,7 +277,7 @@
                 android:paddingBottom="8dp"
                 android:clipToPadding="false" />
 
-            <!-- Empty state -->
+            
             <LinearLayout
                 android:id="@+id/emptyState"
                 android:layout_width="wrap_content"
@@ -386,7 +314,7 @@
 
     </LinearLayout>
 
-    <!-- DRAWER SIDEBAR -->
+    
     <LinearLayout
         android:layout_width="300dp"
         android:layout_height="match_parent"
@@ -394,7 +322,7 @@
         android:orientation="vertical"
         android:background="@color/bg_surface">
 
-        <!-- Sidebar Header -->
+        
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -431,7 +359,7 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
-        <!-- Scrollable menu content -->
+        
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -445,7 +373,7 @@
                 android:orientation="vertical"
                 android:paddingBottom="16dp">
 
-                <!-- Section: STORAGE -->
+                
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -468,7 +396,7 @@
                     android:paddingEnd="10dp"
                     android:clipToPadding="false" />
 
-                <!-- Divider -->
+                
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
@@ -478,7 +406,7 @@
                     android:layout_marginBottom="4dp"
                     android:background="@color/divider" />
 
-                <!-- Section: QUICK ACCESS -->
+                
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -500,6 +428,58 @@
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
                     android:clipToPadding="false" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="@color/divider" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="TOOLS"
+                    android:textColor="@color/text_hint"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="4dp"
+                    android:letterSpacing="0.12" />
+
+                <LinearLayout
+                    android:id="@+id/btnTrash"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp">
+                    
+                    <TextView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:gravity="center"
+                        android:text="&#128465;"
+                        android:textSize="20sp"
+                        android:background="@drawable/bg_icon_circle" />
+                        
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="Trash"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
 
             </LinearLayout>
         </ScrollView>

@@ -10,7 +10,7 @@
     android:paddingBottom="8dp"
     android:background="?attr/selectableItemBackground">
 
-    <!-- Folder icon circle -->
+    
     <TextView
         android:id="@+id/tvFolderEmoji"
         android:layout_width="38dp"
@@ -19,7 +19,7 @@
         android:textSize="18sp"
         android:background="@drawable/bg_icon_circle" />
 
-    <!-- Folder name -->
+    
     <TextView
         android:id="@+id/tvFolderLabel"
         android:layout_width="0dp"
@@ -29,7 +29,7 @@
         android:textSize="13sp"
         android:textColor="@color/black" />
 
-    <!-- Arrow -->
+    
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

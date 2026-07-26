@@ -8,19 +8,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Ham thuan tuy (khong sua doi list goc) cho sap xep & tim kiem.
- * Tach rieng de MainActivity/FolderPicker deu dung lai duoc.
- */
+
 public final class FileListHelper {
 
     private FileListHelper() {
     }
 
-    /** Sap xep: thu muc truoc, sau do theo mode. Tra ve list moi (khong sua list goc). */
+    
     public static List<FileItem> sort(List<FileItem> items, SortMode mode) {
         List<FileItem> copy = new ArrayList<>(items);
-        final SortMode m = mode != null ? mode : SortMode.NAME_ASC;
+        final SortMode m = mode != null ? mode : SortMode.DATE_DESC;
         Collections.sort(copy, new Comparator<FileItem>() {
             @Override
             public int compare(FileItem a, FileItem b) {
@@ -47,7 +44,7 @@ public final class FileListHelper {
         return copy;
     }
 
-    /** Loc theo ten (khong phan biet hoa thuong). Query rong -> tra ve nguyen list. */
+    
     public static List<FileItem> filter(List<FileItem> items, String query) {
         if (query == null || query.trim().isEmpty()) {
             return items;

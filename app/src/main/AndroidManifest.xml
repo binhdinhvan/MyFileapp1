@@ -25,6 +25,7 @@
 
         <activity android:name=".FolderPickerActivity" />
         <activity android:name=".TrashActivity" />
+        <activity android:name=".SearchActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

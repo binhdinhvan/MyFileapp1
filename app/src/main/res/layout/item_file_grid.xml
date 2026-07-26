@@ -21,7 +21,7 @@
             android:gravity="center_horizontal"
             android:padding="10dp">
 
-            <!-- Badge icon -->
+            
             <TextView
                 android:id="@+id/tvBadge"
                 android:layout_width="60dp"
@@ -32,7 +32,7 @@
                 android:textColor="@color/badge_folder_text"
                 android:background="@drawable/bg_badge_folder" />
 
-            <!-- File name -->
+            
             <TextView
                 android:id="@+id/tvName"
                 android:layout_width="match_parent"
@@ -42,10 +42,10 @@
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"
-                android:maxLines="2"
+                android:lines="2"
                 android:ellipsize="end" />
 
-            <!-- Detail (size / count) -->
+            
             <TextView
                 android:id="@+id/tvDetail"
                 android:layout_width="match_parent"
@@ -59,7 +59,7 @@
 
         </LinearLayout>
 
-        <!-- Checkbox overlay (selection mode) -->
+        
         <CheckBox
             android:id="@+id/tvCheck"
             android:layout_width="wrap_content"

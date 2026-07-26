@@ -1,6 +1,6 @@
 package com.example.myfile.data.storage;
 
-/** Mot thu muc nhanh hien trong drawer (Hinh anh, Video, Nhac, ...). */
+
 public class QuickFolderItem {
     private final String label;
     private final String path;

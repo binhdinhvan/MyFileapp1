@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary brand -->
+    
     <color name="blue_primary">#1976D2</color>
     <color name="blue_dark">#1565C0</color>
     <color name="blue_light">#2196F3</color>
     <color name="blue_accent">#E8F0FE</color>
 
-    <!-- Neutral -->
+    
     <color name="white">#FFFFFF</color>
     <color name="black">#212121</color>
     <color name="text_secondary">#757575</color>
@@ -15,7 +15,7 @@
     <color name="bg_surface">#F5F7FF</color>
     <color name="bg_card">#FFFFFF</color>
 
-    <!-- Badge colors -->
+    
     <color name="badge_folder_bg">#E8F0FE</color>
     <color name="badge_folder_text">#1565C0</color>
     <color name="badge_file_bg">#FFF3E0</color>
@@ -29,7 +29,7 @@
     <color name="badge_doc_bg">#E3F2FD</color>
     <color name="badge_doc_text">#0D47A1</color>
 
-    <!-- Action colors -->
+    
     <color name="action_delete">#EF5350</color>
     <color name="action_move">#FF9800</color>
     <color name="action_copy">#29B6F6</color>

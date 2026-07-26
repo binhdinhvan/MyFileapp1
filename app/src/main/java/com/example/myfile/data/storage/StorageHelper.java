@@ -7,13 +7,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Liet ke cac noi luu tru va thu muc nhanh cho drawer.
- * - Bo nho trong: Environment.getExternalStorageDirectory()
- * - The SD / USB: suy ra tu getExternalFilesDirs() bang cach cat bo "/Android/data/..."
- *   de lay duong dan goc cua volume (vd /storage/XXXX-XXXX).
- * - Thu muc nhanh: Hinh anh, Video, Nhac, Tai lieu, Download, DCIM, ...
- */
+
 public final class StorageHelper {
 
     private StorageHelper() {
@@ -27,7 +21,7 @@ public final class StorageHelper {
 
         File[] externals = context.getExternalFilesDirs(null);
         if (externals != null) {
-            // index 0 = bo nho trong (da them o tren) -> bat dau tu 1
+
             for (int i = 1; i < externals.length; i++) {
                 File ext = externals[i];
                 if (ext == null) {
@@ -47,10 +41,7 @@ public final class StorageHelper {
         return list;
     }
 
-    /**
-     * Returns the list of quick-access folders (Downloads, DCIM, Pictures, etc.).
-     * Only adds a folder if it actually exists on the device.
-     */
+    
     public static List<QuickFolderItem> getQuickFolders() {
         List<QuickFolderItem> list = new ArrayList<>();
         String base = Environment.getExternalStorageDirectory().getAbsolutePath();
