@@ -60,6 +60,16 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public List<String> getSelectedPaths() {
         return new ArrayList<>(selectedPaths);
     }
+    
+    public List<FileItem> getSelectedItems() {
+        List<FileItem> result = new ArrayList<>();
+        for (FileItem item : items) {
+            if (item != null && selectedPaths.contains(item.getPath())) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
 
     public void enterSelectionMode() {
         selectionMode = true;
@@ -75,7 +85,7 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         listener.onSelectionChanged(false, 0);
     }
 
-    private void toggleSelection(FileItem item) {
+    public void toggleSelection(FileItem item) {
         if (selectedPaths.contains(item.getPath())) {
             selectedPaths.remove(item.getPath());
         } else {

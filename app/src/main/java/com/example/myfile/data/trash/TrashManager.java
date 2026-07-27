@@ -95,7 +95,11 @@ public class TrashManager {
             String trashedName = f.getName();
             String originalPath = prefs.getString(trashedName, null);
             String displayName = originalPath != null ? new File(originalPath).getName() : trashedName;
-            result.add(new FileItem(displayName, f.getAbsolutePath(), f.isDirectory(), f.isDirectory() ? 0L : f.length(), f.lastModified()));
+            long trashedTime = extractTimestamp(trashedName);
+            if (trashedTime <= 0) {
+                trashedTime = f.lastModified();
+            }
+            result.add(new FileItem(displayName, f.getAbsolutePath(), f.isDirectory(), f.isDirectory() ? 0L : f.length(), trashedTime));
         }
         return result;
     }

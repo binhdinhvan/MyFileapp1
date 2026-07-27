@@ -5,6 +5,61 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/selectionToolbarTrash"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#333333"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/btnSelCancelTrash"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="✕"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:background="?attr/selectableItemBackground" />
+
+        <TextView
+            android:id="@+id/tvSelectionCountTrash"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 selected"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:paddingStart="16dp" />
+
+        <TextView
+            android:id="@+id/btnSelRestore"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="RESTORE"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground" />
+
+        <TextView
+            android:id="@+id/btnSelDeleteTrash"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="DELETE"
+            android:textColor="#E53935"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/defaultToolbarTrash"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -18,6 +73,14 @@
             android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
+            
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Files auto-delete after 30 days"
+            android:textColor="#BBDEFB"
+            android:textSize="12sp"
+            android:layout_marginTop="2dp" />
     </LinearLayout>
 
     <FrameLayout
