@@ -26,6 +26,7 @@
         <activity android:name=".FolderPickerActivity" />
         <activity android:name=".TrashActivity" />
         <activity android:name=".SearchActivity" />
+        <activity android:name=".ui.vault.PrivateVaultActivity" android:theme="@style/Theme.MyFile" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

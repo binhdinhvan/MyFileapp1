@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
 
     private FileRepository fileRepository;
     private TrashManager trashManager;
+    private com.example.myfile.data.vault.PrivateVaultManager vaultManager;
     private FileAdapter adapter;
     private TextView tvCurrentPath;
     private LinearLayout emptyState;
@@ -91,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
 
         fileRepository = new FileRepositoryImpl();
         trashManager = new TrashManager(this);
+        vaultManager = new com.example.myfile.data.vault.PrivateVaultManager(this);
         tvCurrentPath = findViewById(R.id.tvCurrentPath);
         emptyState = findViewById(R.id.emptyState);
         selectionToolbar = findViewById(R.id.selectionToolbar);
@@ -114,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         findViewById(R.id.btnSelMove).setOnClickListener(v -> bulkMove());
         findViewById(R.id.btnSelCopy).setOnClickListener(v -> bulkCopy());
         findViewById(R.id.btnSelZip).setOnClickListener(v -> bulkZip());
+        findViewById(R.id.btnSelVault).setOnClickListener(v -> bulkVault());
         findViewById(R.id.btnTrash).setOnClickListener(v -> startActivity(new Intent(this, TrashActivity.class)));
         findViewById(R.id.btnBack).setOnClickListener(v -> navigateUp());
         findViewById(R.id.btnSearchIcon).setOnClickListener(v -> startActivity(new Intent(this, SearchActivity.class)));
@@ -137,6 +140,100 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
 
         setupBrowseFeatures();
         setupBottomNavigation();
+        setupSwipeDownGesture(recyclerView);
+    }
+    
+    private void setupSwipeDownGesture(RecyclerView recyclerView) {
+        recyclerView.setOnTouchListener(new View.OnTouchListener() {
+            float startY;
+            boolean isHolding = false;
+            long holdStartTime = 0;
+            @Override
+            public boolean onTouch(View v, android.view.MotionEvent event) {
+                switch (event.getAction()) {
+                    case android.view.MotionEvent.ACTION_DOWN:
+                        startY = event.getY();
+                        isHolding = false;
+                        break;
+                    case android.view.MotionEvent.ACTION_MOVE:
+                        float deltaY = event.getY() - startY;
+                        if (!recyclerView.canScrollVertically(-1) && deltaY > 300) {
+                            if (!isHolding) {
+                                isHolding = true;
+                                holdStartTime = System.currentTimeMillis();
+                            } else if (System.currentTimeMillis() - holdStartTime > 1000) {
+                                isHolding = false;
+                                startY = event.getY();
+                                openVaultAuthentication();
+                            }
+                        } else {
+                            isHolding = false;
+                        }
+                        break;
+                    case android.view.MotionEvent.ACTION_UP:
+                    case android.view.MotionEvent.ACTION_CANCEL:
+                        isHolding = false;
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void openVaultAuthentication() {
+        boolean isSetup = !vaultManager.isPasswordSet();
+        
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_vault_auth, null);
+        TextView tvTitle = dialogView.findViewById(R.id.tvVaultAuthTitle);
+        TextView tvSubtitle = dialogView.findViewById(R.id.tvVaultAuthSubtitle);
+        com.google.android.material.textfield.TextInputEditText etPassword = dialogView.findViewById(R.id.etVaultPassword);
+        TextView btnCancel = dialogView.findViewById(R.id.btnVaultAuthCancel);
+        TextView btnConfirm = dialogView.findViewById(R.id.btnVaultAuthConfirm);
+        
+        if (isSetup) {
+            tvTitle.setText("Setup Vault");
+            tvSubtitle.setText("Create a password for your Private Vault");
+            btnConfirm.setText("SAVE");
+        } else {
+            tvTitle.setText("Private Vault");
+            tvSubtitle.setText("Enter your password to unlock");
+            btnConfirm.setText("UNLOCK");
+        }
+        
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(dialogView)
+                .create();
+                
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+                
+        btnCancel.setOnClickListener(v -> dialog.dismiss());
+        
+        btnConfirm.setOnClickListener(v -> {
+            String pwd = etPassword.getText().toString();
+            if (pwd.isEmpty()) {
+                Toast.makeText(this, "Password cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            if (isSetup) {
+                vaultManager.setPassword(pwd);
+                Toast.makeText(this, "Password saved", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+                startActivity(new Intent(this, com.example.myfile.ui.vault.PrivateVaultActivity.class));
+            } else {
+                if (vaultManager.checkPassword(pwd)) {
+                    dialog.dismiss();
+                    startActivity(new Intent(this, com.example.myfile.ui.vault.PrivateVaultActivity.class));
+                } else {
+                    Toast.makeText(this, "Incorrect password", Toast.LENGTH_SHORT).show();
+                    etPassword.setText("");
+                }
+            }
+        });
+        
+        dialog.show();
     }
     
     private boolean isRecentTab = false;
@@ -458,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
 
     @Override
     public void onItemLongClick(FileItem item) {
-        List<String> baseOptions = new java.util.ArrayList<>(java.util.Arrays.asList("Rename", "Move", "Copy", "Cut", "Delete", "Share", "Properties", "Zip"));
+        List<String> baseOptions = new java.util.ArrayList<>(java.util.Arrays.asList("Rename", "Move", "Copy", "Cut", "Delete", "Share", "Properties", "Zip", "Move to Vault"));
         if (!item.isDirectory() && item.getName().toLowerCase().endsWith(".zip")) {
             baseOptions.add("Unzip (Extract)");
         }
@@ -488,6 +585,14 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
                         showZipDialog(java.util.Collections.singletonList(item.getPath()));
                     } else if (selected.equals("Unzip (Extract)")) {
                         showUnzipDialog(item.getPath());
+                    } else if (selected.equals("Move to Vault")) {
+                        if (vaultManager.moveToVault(item.getPath()) != null) {
+                            Toast.makeText(this, "Moved to Vault", Toast.LENGTH_SHORT).show();
+                            if (isRecentTab) loadRecentFiles();
+                            else loadFiles(currentPath);
+                        } else {
+                            Toast.makeText(this, "Failed to move to Vault", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .show();
@@ -504,6 +609,27 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
             if (!isRecentTab) {
                 quickActionsContainer.setVisibility(View.VISIBLE);
             }
+        }
+    }
+
+    private void bulkVault() {
+        List<String> paths = adapter.getSelectedPaths();
+        if (paths.isEmpty()) {
+            Toast.makeText(this, "No items selected", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        int successCount = 0;
+        for (String path : paths) {
+            if (vaultManager.moveToVault(path) != null) {
+                successCount++;
+            }
+        }
+        Toast.makeText(this, "Moved " + successCount + " items to Vault", Toast.LENGTH_SHORT).show();
+        adapter.exitSelectionMode();
+        if (isRecentTab) {
+            loadRecentFiles();
+        } else {
+            loadFiles(currentPath);
         }
     }
 

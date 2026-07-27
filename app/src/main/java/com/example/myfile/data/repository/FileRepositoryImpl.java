@@ -26,6 +26,10 @@ public class FileRepositoryImpl implements FileRepository {
             return a.getName().compareToIgnoreCase(b.getName());
         });
         for (File f : children) {
+            String name = f.getName();
+            if (name.equals(".PrivateVault") || name.equals(".AppTrash") || name.equals(".thumbnails")) {
+                continue;
+            }
             result.add(FileItem.fromFile(f));
         }
         return result;
