@@ -28,6 +28,11 @@
         <activity android:name=".SearchActivity" />
         <activity android:name=".ui.vault.PrivateVaultActivity" android:theme="@style/Theme.MyFile" />
 
+        <activity android:name=".feature.viewer.image.ImageViewerActivity" android:exported="false" />
+        <activity android:name=".feature.viewer.video.VideoPlayerActivity" android:exported="false" />
+        <activity android:name=".feature.viewer.exif.ExifViewerActivity" android:exported="false" />
+        <activity android:name=".feature.viewer.text.TextViewerActivity" android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

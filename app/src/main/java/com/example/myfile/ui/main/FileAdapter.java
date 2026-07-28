@@ -60,7 +60,7 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public List<String> getSelectedPaths() {
         return new ArrayList<>(selectedPaths);
     }
-    
+
     public List<FileItem> getSelectedItems() {
         List<FileItem> result = new ArrayList<>();
         for (FileItem item : items) {
@@ -307,5 +307,9 @@ public class FileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             super(itemView);
             tvHeaderTitle = itemView.findViewById(R.id.tvHeaderTitle);
         }
+    }
+
+    public java.util.List<com.example.myfile.data.model.FileItem> getItems() {
+        return this.items;
     }
 }

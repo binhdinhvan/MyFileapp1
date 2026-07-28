@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         setupBottomNavigation();
         setupSwipeDownGesture(recyclerView);
     }
-    
+
     private void setupSwipeDownGesture(RecyclerView recyclerView) {
         recyclerView.setOnTouchListener(new View.OnTouchListener() {
             float startY;
@@ -182,14 +182,14 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
 
     private void openVaultAuthentication() {
         boolean isSetup = !vaultManager.isPasswordSet();
-        
+
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_vault_auth, null);
         TextView tvTitle = dialogView.findViewById(R.id.tvVaultAuthTitle);
         TextView tvSubtitle = dialogView.findViewById(R.id.tvVaultAuthSubtitle);
         com.google.android.material.textfield.TextInputEditText etPassword = dialogView.findViewById(R.id.etVaultPassword);
         TextView btnCancel = dialogView.findViewById(R.id.btnVaultAuthCancel);
         TextView btnConfirm = dialogView.findViewById(R.id.btnVaultAuthConfirm);
-        
+
         if (isSetup) {
             tvTitle.setText("Setup Vault");
             tvSubtitle.setText("Create a password for your Private Vault");
@@ -199,24 +199,24 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
             tvSubtitle.setText("Enter your password to unlock");
             btnConfirm.setText("UNLOCK");
         }
-        
+
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setView(dialogView)
                 .create();
-                
+
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
-                
+
         btnCancel.setOnClickListener(v -> dialog.dismiss());
-        
+
         btnConfirm.setOnClickListener(v -> {
             String pwd = etPassword.getText().toString();
             if (pwd.isEmpty()) {
                 Toast.makeText(this, "Password cannot be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
-            
+
             if (isSetup) {
                 vaultManager.setPassword(pwd);
                 Toast.makeText(this, "Password saved", Toast.LENGTH_SHORT).show();
@@ -232,10 +232,10 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
                 }
             }
         });
-        
+
         dialog.show();
     }
-    
+
     private boolean isRecentTab = false;
 
     private void setupBottomNavigation() {
@@ -530,26 +530,35 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
         }
     }
 
-    private void openFile(FileItem item) {
-        try {
-            File file = new File(item.getPath());
-            Uri uri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", file);
-            
-            String extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(file).toString());
-            String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension != null ? extension.toLowerCase() : "");
-            
-            if (mimeType == null) {
-                mimeType = "*/*";
-            }
+    private void openFile(com.example.myfile.data.model.FileItem item) {
+        String filePath = item.getPath();
+        String extension = android.webkit.MimeTypeMap.getFileExtensionFromUrl(filePath);
+        String mimeType = android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.toLowerCase());
 
-            Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (mimeType == null) {
+            mimeType = "*/*";
+        }
+
+        if (mimeType.startsWith("image/") || mimeType.startsWith("video/") || mimeType.startsWith("text/")) {
+            com.example.myfile.feature.viewer.ViewerFactory.open(this, item, adapter.getItems());
+        } else {
+            android.content.Intent intent = new android.content.Intent(android.content.Intent.ACTION_VIEW);
+
+            android.net.Uri uri = androidx.core.content.FileProvider.getUriForFile(
+                    this,
+                    getApplicationContext().getPackageName() + ".fileprovider",
+                    new java.io.File(filePath)
+            );
+
             intent.setDataAndType(uri, mimeType);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            
-            startActivity(Intent.createChooser(intent, "Open with"));
-        } catch (Exception e) {
-            Toast.makeText(this, "Cannot open file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
+            intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            try {
+                startActivity(android.content.Intent.createChooser(intent, "Open with"));
+            } catch (Exception e) {
+                Toast.makeText(this, "Cannot open file: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
         }
     }
 
@@ -669,7 +678,8 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
                     if (!name.endsWith(".zip")) name += ".zip";
                     
                     String dest = currentPath + "/" + name;
-                    FileOperation op = new com.example.myfile.domain.operation.ZipOperation(paths, dest);
+                    new com.example.myfile.domain.operation.ZipOperation().compressFiles(this, paths, dest);
+                    FileOperation op = null;
                     runOperationWithProgress(op, "Compressing...", "Zipped successfully", "Zip failed");
                 })
                 .setNegativeButton("Cancel", null)
@@ -685,7 +695,8 @@ public class MainActivity extends AppCompatActivity implements FileAdapter.OnIte
                 .setTitle("Extract " + zipFile.getName())
                 .setMessage("Extract to: " + defaultDest + " ?")
                 .setPositiveButton("Extract", (dialog, which) -> {
-                    FileOperation op = new com.example.myfile.domain.operation.UnzipOperation(zipPath, defaultDest);
+                    new com.example.myfile.domain.operation.UnzipOperation().extractFile(this, zipPath, defaultDest);
+                    FileOperation op = null;
                     runOperationWithProgress(op, "Extracting...", "Extracted successfully", "Extraction failed");
                 })
                 .setNegativeButton("Cancel", null)

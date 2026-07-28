@@ -36,4 +36,10 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.activity:activity:1.8.2")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // [C] Xem anh/video/EXIF + nen-giai nen
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
+    implementation("com.google.android.exoplayer:exoplayer:2.19.1")
+    implementation("androidx.exifinterface:exifinterface:1.3.7")
 }
